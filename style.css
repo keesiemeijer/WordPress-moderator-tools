@@ -1,0 +1,39 @@
+article {
+	border-bottom: 1px dashed grey;
+}
+
+.section {
+	border-bottom: 1px solid #a4a4a4;
+}
+
+img {
+	border: 1px solid #CCCCCC;
+}
+
+.last {
+	border: none;
+	margin-bottom: 1em;
+}
+
+body {
+	font-size: 100%;
+	line-height: 1.6875;
+	font-family: Arial, Helvetica, sans-serif;
+	margin: 0 1em;
+}
+
+#main {
+	max-width: 50em;
+	margin: 0 auto;
+}
+
+h2,h3 {
+	font-weight: normal;
+}
+
+code {
+	font-family: Consolas,Monaco,"Courier New",Courier,monospace;
+	background: #F3F3F7;
+	border: 1px solid #DEDEE3;
+	padding: 3px 5px;
+}
