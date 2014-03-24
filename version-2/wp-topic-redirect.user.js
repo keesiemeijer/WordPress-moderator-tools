@@ -28,9 +28,9 @@
     }
 
     if ( new_url ) {
-        window.onload =function(){
+       
             window.location.replace( new_url + window.location.hash);
-        };
+        
         
     }
 
