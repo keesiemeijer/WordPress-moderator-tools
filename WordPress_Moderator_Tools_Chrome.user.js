@@ -925,22 +925,28 @@ moderator_tools_with_jquery(function($) {
 					if ( img ) {
 						$( this ).children().first( 'a' ).prepend( img );
 					}
-					$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
-					$( this ).parent().addClass( 'wpmt_bozo_post' );
 
 					if ( ajax ) {
-						var $container = $(this);
+						var $container = $(this).children().first( 'a' );
+						console.dir( $container );
 
 						$.ajax({
-							url      : $("a", $(this)).attr('href') + '/edit',
+							url      : $container.attr("href") + '/edit',
 							async    : true,
 							dataType : 'html',
 							success  : function (html) {
 								if ( -1 != html.search( pattern.ANT ) ) {
-									$("span", $container).append( ' (ANT)' );
+									$container.append( '<span class="wpmt_bozo_profile" >BOZO (ANT)</span>' );
+									$container.parent().addClass( 'wpmt_bozo_post' );
+								} else {
+									$container.append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
+									$container.parent().addClass( 'wpmt_bozo_post' );
 								}
 							}
 						});
+					} else {
+						$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
+						$( this ).parent().addClass( 'wpmt_bozo_post' );
 					}
 					++bozo;
 				} else {
