@@ -486,6 +486,25 @@ moderator_tools_with_jquery(function($) {
 
 			}
 		} );
+
+		// If ajax mode is enabled, remove tags via ajax instead of reloading the page repeatedly
+		$('[class^="delete:yourtaglist:"]').click(function (e) {
+			if ( ajax ) {
+				e.preventDefault();
+
+				var $parent = $(this).closest('li'),
+					link = $(this).attr('href');
+
+				$.ajax({
+					url: link,
+					async: true,
+					dataType: 'html',
+					success: function (html) {
+						$parent.fadeOut();
+					}
+				});
+			}
+		});
 	}
 
 
