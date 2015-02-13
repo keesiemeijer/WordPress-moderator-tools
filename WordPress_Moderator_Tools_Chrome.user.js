@@ -908,6 +908,21 @@ moderator_tools_with_jquery(function($) {
 					}
 					$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
 					$( this ).parent().addClass( 'wpmt_bozo_post' );
+
+					if ( ajax ) {
+						var $container = $(this);
+
+						$.ajax({
+							url      : $("a", $(this)).attr('href') + '/edit',
+							async    : true,
+							dataType : 'html',
+							success  : function (html) {
+								if ( -1 != html.search( pattern.ANT ) ) {
+									$("span", $container).append( ' (ANT)' );
+								}
+							}
+						});
+					}
 					++bozo;
 				} else {
 					$( this ).parent().addClass( 'wpmt_normal_post' );
