@@ -9,7 +9,7 @@
 // @include     *://*wordpress.org/support/topic/*
 // @include     *://*wordpress.org/support/edit.php?id=*
 // @include     *://*wordpress.org/tags/modlook
-// @version     3
+// @version     3.1
 // @grant       none
 // ==/UserScript==
 
@@ -42,7 +42,14 @@ moderator_tools_with_jquery(function($) {
 		form_focus = false,
 		is_admin = false,
 		logged_in = false,
+		ajax = true,
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
+
+	var pattern = {
+		ANT      : new RegExp( "id=\"elf_not_trusted\".+?checked=\"checked\"", "gi" ),
+		EditPost : new RegExp( ".+?\/support\/edit\.php.+?", "gi" ),
+		username : new RegExp( "id=\"userlogin\">(.+?)<", "gi" )
+	};
 
 	var shortcuts = {
 		a: "%a% - <span class='wpmt_select'>select</span>/deselect all posts",
@@ -479,6 +486,25 @@ moderator_tools_with_jquery(function($) {
 
 			}
 		} );
+
+		// If ajax mode is enabled, remove tags via ajax instead of reloading the page repeatedly
+		$('[class^="delete:yourtaglist:"]').click(function (e) {
+			if ( ajax ) {
+				e.preventDefault();
+
+				var $parent = $(this).closest('li'),
+					link = $(this).attr('href');
+
+				$.ajax({
+					url: link,
+					async: true,
+					dataType: 'html',
+					success: function (html) {
+						$parent.fadeOut();
+					}
+				});
+			}
+		});
 	}
 
 
@@ -899,8 +925,29 @@ moderator_tools_with_jquery(function($) {
 					if ( img ) {
 						$( this ).children().first( 'a' ).prepend( img );
 					}
-					$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
-					$( this ).parent().addClass( 'wpmt_bozo_post' );
+
+					if ( ajax ) {
+						var $container = $(this).children().first( 'a' );
+						console.dir( $container );
+
+						$.ajax({
+							url      : $container.attr("href") + '/edit',
+							async    : true,
+							dataType : 'html',
+							success  : function (html) {
+								if ( -1 != html.search( pattern.ANT ) ) {
+									$container.append( '<span class="wpmt_bozo_profile" >BOZO (ANT)</span>' );
+									$container.parent().addClass( 'wpmt_bozo_post' );
+								} else {
+									$container.append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
+									$container.parent().addClass( 'wpmt_bozo_post' );
+								}
+							}
+						});
+					} else {
+						$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
+						$( this ).parent().addClass( 'wpmt_bozo_post' );
+					}
 					++bozo;
 				} else {
 					$( this ).parent().addClass( 'wpmt_normal_post' );
@@ -1023,7 +1070,25 @@ moderator_tools_with_jquery(function($) {
 				if ( obj_exists( parent ) ) {
 					parent_id = parent.attr( 'id' ).split( '_' );
 					if ( parent_id[ 1 ].length ) {
-						parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + parent_id[ 1 ] + '</a>' ) );
+						if ( ajax ) {
+							var label = parent_id[1];
+							$.ajax({
+								url      : 'https://wordpress.org/support/profile/' + parent_id[ 1 ],
+								async    : true,
+								dataType : 'html',
+								success  : function (html) {
+									var details = pattern.username.exec( html );
+									console.dir( details );
+									if ( details.length >= 2 ) {
+										label = details[1];
+									}
+
+									parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + label + '</a>' ) );
+								}
+							});
+						} else {
+							parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + parent_id[1] + '</a>' ) );
+						}
 					}
 				}
 			}
