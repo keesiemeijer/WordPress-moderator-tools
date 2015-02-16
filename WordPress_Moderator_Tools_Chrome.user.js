@@ -8,25 +8,29 @@
 // @include     *://*wordpress.org/support/forum/*
 // @include     *://*wordpress.org/support/topic/*
 // @include     *://*wordpress.org/support/edit.php?id=*
+// @include     *://*wordpress.org/support/view/plugin-reviews/*
+// @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
 // @version     3.1
+// @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome.user.js
+// @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome.user.js
 // @grant       none
 // ==/UserScript==
 
-function moderator_tools_with_jquery(f) {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.textContent = "(" + f.toString() + ")(jQuery)";
-    document.body.appendChild(script);
+function moderator_tools_with_jquery( f ) {
+	var script = document.createElement( "script" );
+	script.type = "text/javascript";
+	script.textContent = "(" + f.toString() + ")(jQuery)";
+	document.body.appendChild( script );
 }
 
-moderator_tools_with_jquery(function($) {
+moderator_tools_with_jquery( function( $ ) {
 
 	var menu = 'hide';
 	var select_color = '#e3cebd';
 
 	// Next up variables separated by comma's
-	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}',
+	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;}',
 		current_class = 'wpmt_current',
 		bb_admin_url = 'https://wordpress.org/support/bb-admin',
 		shortcuts_title = '<span class="wpmt_shortcuts_title">Shortcuts available for this page:</span>',
@@ -46,9 +50,9 @@ moderator_tools_with_jquery(function($) {
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
-		ANT      : new RegExp( "id=\"elf_not_trusted\".+?checked=\"checked\"", "gi" ),
-		EditPost : new RegExp( ".+?\/support\/edit\.php.+?", "gi" ),
-		username : new RegExp( "id=\"userlogin\">(.+?)<", "gi" )
+		ANT: new RegExp( "id=\"elf_not_trusted\".+?checked=\"checked\"", "gi" ),
+		EditPost: new RegExp( ".+?\/support\/edit\.php.+?", "gi" ),
+		username: new RegExp( "id=\"userlogin\">(.+?)<", "gi" )
 	};
 
 	var shortcuts = {
@@ -129,6 +133,12 @@ moderator_tools_with_jquery(function($) {
 				if ( obj_exists( $( '.forumlist' ) ) ) {
 					// wordpress.org/support/forum/
 					add_view_is_all_parameter( '.widefat' );
+				}
+
+				if ( obj_exists( $( '.all-reviews' ) ) ) {
+					// wordpress.org/support/view/plugin-reviews/
+					// wordpress.org/support/view/theme-reviews/
+					reviews_init();
 				}
 			}
 
@@ -341,6 +351,11 @@ moderator_tools_with_jquery(function($) {
 	 */
 	function topic_init() {
 
+		options = {
+			tags: $( '#yourtaglist' ),
+			author: '.threadauthor > p > strong'
+		};
+
 		// menu style
 		var style = ".wpmt_current .authortitle a {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
@@ -370,7 +385,10 @@ moderator_tools_with_jquery(function($) {
 		top_element = $( '#wporg-header' );
 		bottom_element = next_prev_objects.last();
 
-		check_duplicate_IPs();
+		if ( obj_exists( next_prev_objects ) > 1 ) {
+			// checks for duplicate IPs
+			check_duplicate_IPs();
+		}
 
 		add_modlook_profile();
 
@@ -382,6 +400,30 @@ moderator_tools_with_jquery(function($) {
 			next_prev_objects.first().trigger( 'click.wpmt' );
 		}
 
+	}
+
+
+	function reviews_init() {
+
+		next_prev_objects = $( ".reviewer" );
+		if ( obj_exists( next_prev_objects ) < 2 ) {
+			return;
+		}
+
+		options = {
+			author: '.reviewer-name'
+		};
+
+		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
+
+		// test if duplicate IPs are found
+
+		// var ip1 = next_prev_objects.eq( 0 ).find( '.post-ip-link' ).text();
+		// if ( obj_exists( next_prev_objects.eq( 1 ) ) ) {
+		// next_prev_objects.eq( 1 ).find( '.post-ip-link' ).text( ip1 );
+		// }
+
+		check_duplicate_IPs();
 	}
 
 
@@ -488,23 +530,23 @@ moderator_tools_with_jquery(function($) {
 		} );
 
 		// If ajax mode is enabled, remove tags via ajax instead of reloading the page repeatedly
-		$('[class^="delete:yourtaglist:"]').click(function (e) {
+		$( '[class^="delete:yourtaglist:"]' ).click( function( e ) {
 			if ( ajax ) {
 				e.preventDefault();
 
-				var $parent = $(this).closest('li'),
-					link = $(this).attr('href');
+				var $parent = $( this ).closest( 'li' ),
+					link = $( this ).attr( 'href' );
 
-				$.ajax({
+				$.ajax( {
 					url: link,
 					async: true,
 					dataType: 'html',
-					success: function (html) {
+					success: function( html ) {
 						$parent.fadeOut();
 					}
-				});
+				} );
 			}
-		});
+		} );
 	}
 
 
@@ -655,21 +697,21 @@ moderator_tools_with_jquery(function($) {
 
 		// Ajax behavior when deleting or not-spam marking threads
 		if ( ajax ) {
-			$(".post-delete-link, .post-spam-link").click(function (e) {
+			$( ".post-delete-link, .post-spam-link" ).click( function( e ) {
 				e.preventDefault();
 
-				var $parent = $(this).closest('tr'),
-					link = $(this).attr('href');
+				var $parent = $( this ).closest( 'tr' ),
+					link = $( this ).attr( 'href' );
 
-				$.ajax({
+				$.ajax( {
 					url: link,
 					async: true,
 					dataType: 'html',
-					success: function (html) {
+					success: function( html ) {
 						$parent.fadeOut();
 					}
-				});
-			});
+				} );
+			} );
 		}
 
 		options.bulk_actions_checkbox.bind( 'click.wpmt', function() {
@@ -946,14 +988,14 @@ moderator_tools_with_jquery(function($) {
 					}
 
 					if ( ajax ) {
-						var $container = $(this).children().first( 'a' );
-						console.dir( $container );
+						var $container = $( this ).children().first( 'a' );
+						// console.dir( $container );
 
-						$.ajax({
-							url      : $container.attr("href") + '/edit',
-							async    : true,
-							dataType : 'html',
-							success  : function (html) {
+						$.ajax( {
+							url: $container.attr( "href" ) + '/edit',
+							async: true,
+							dataType: 'html',
+							success: function( html ) {
 								if ( -1 != html.search( pattern.ANT ) ) {
 									$container.append( '<span class="wpmt_bozo_profile" >BOZO (ANT)</span>' );
 									$container.parent().addClass( 'wpmt_bozo_post' );
@@ -962,7 +1004,7 @@ moderator_tools_with_jquery(function($) {
 									$container.parent().addClass( 'wpmt_bozo_post' );
 								}
 							}
-						});
+						} );
 					} else {
 						$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
 						$( this ).parent().addClass( 'wpmt_bozo_post' );
@@ -1040,7 +1082,7 @@ moderator_tools_with_jquery(function($) {
 		// remove duplicate objects with same profile name
 		_next_prev_objects = _next_prev_objects.filter( function() {
 
-			var txt = $( this ).find( '.threadauthor > p > strong' ).text();
+			var txt = $( this ).find( options.author ).text();
 			if ( seen[ txt ] ) {
 				return false;
 			} else {
@@ -1090,23 +1132,23 @@ moderator_tools_with_jquery(function($) {
 					parent_id = parent.attr( 'id' ).split( '_' );
 					if ( parent_id[ 1 ].length ) {
 						if ( ajax ) {
-							var label = parent_id[1];
-							$.ajax({
-								url      : 'https://wordpress.org/support/profile/' + parent_id[ 1 ],
-								async    : true,
-								dataType : 'html',
-								success  : function (html) {
+							var label = parent_id[ 1 ];
+							$.ajax( {
+								url: 'https://wordpress.org/support/profile/' + parent_id[ 1 ],
+								async: true,
+								dataType: 'html',
+								success: function( html ) {
 									var details = pattern.username.exec( html );
-									console.dir( details );
+									// console.dir( details );
 									if ( details.length >= 2 ) {
-										label = details[1];
+										label = details[ 1 ];
 									}
 
 									parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + label + '</a>' ) );
 								}
-							});
+							} );
 						} else {
-							parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + parent_id[1] + '</a>' ) );
+							parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + parent_id[ 1 ] + '</a>' ) );
 						}
 					}
 				}
@@ -1339,4 +1381,4 @@ moderator_tools_with_jquery(function($) {
 
 	init();
 
-});
+} );
