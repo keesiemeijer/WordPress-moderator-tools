@@ -653,6 +653,25 @@ moderator_tools_with_jquery(function($) {
 			} // if(posts_list.length)
 		} ); // keydown.event
 
+		// Ajax behavior when deleting or not-spam marking threads
+		if ( ajax ) {
+			$(".post-delete-link, .post-spam-link").click(function (e) {
+				e.preventDefault();
+
+				var $parent = $(this).closest('tr'),
+					link = $(this).attr('href');
+
+				$.ajax({
+					url: link,
+					async: true,
+					dataType: 'html',
+					success: function (html) {
+						$parent.fadeOut();
+					}
+				});
+			});
+		}
+
 		options.bulk_actions_checkbox.bind( 'click.wpmt', function() {
 			options.bulk_actions = ( $( this ).attr( "checked" ) ) ? 'on' : 'off';
 			set_bulk_actions_checkbox();
