@@ -424,6 +424,8 @@ moderator_tools_with_jquery( function( $ ) {
 		// }
 
 		check_duplicate_IPs();
+		
+		viewAllReviews();
 	}
 
 
@@ -1378,6 +1380,74 @@ moderator_tools_with_jquery( function( $ ) {
 		return 0;
 	}
 
+	/**
+	 * Filter to view all reviews on the first review page 
+	 */ 
+	function viewAllReviews() {
+		var pagination = $('#pages').first(),
+			pages = $(pagination).find('a').not('.next'),
+			lastPage = pages.last(),
+			pageCount = 1,
+			url = window.location.href,
+			container = $('<div class="all-reviews_container" />'),
+			wrapper = $('.all-reviews').append(container);
+
+		// Only apply if on the first reviews page
+		if (pagination.children().first().hasClass('current')) {
+			var totalReviews = $('.reviews-total-count span[itemprop="reviewCount"]'),
+				totalReviewsCount = totalReviews.text(),
+				button = $('<button class="reviews-total-count">Show ' + totalReviews.text() + ' reviews</button>'),
+				currentReviews = $('.review').length;
+
+			// Create a button for this filter
+			totalReviews.before(button);
+			totalReviews.remove();
+
+			button.click(function() {
+
+				// If all reviews are shown
+				if (button.hasClass('reviews-total-count--visible')) {
+					// Hide the reviews
+					container.hide();
+					button
+					.text('Show ' + totalReviews.text() + ' reviews')
+					.removeClass('reviews-total-count--visible');
+				} 
+				// If all reviews are hidden but the button has been pressed
+				else if (button.hasClass('reviews-total-count--toggled')) {
+					// Show the reviews
+					container.show();
+					button
+					.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
+					.addClass('reviews-total-count--visible');
+				} else {
+					// Toggle the text
+					button
+					.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
+					// also add a toggled classes to target
+					.addClass('reviews-total-count--toggled reviews-total-count--visible');
+
+					// Looping each review page
+					for (pageCount; pageCount < lastPage.text(); pageCount++)  {
+
+						// Grab the contents of each review page
+						$.get(url + '/page/' + pageCount, function(data) {
+							var reviews = $(data).find('.review');
+
+							// Append the reviews to the current first page
+							container.append(reviews);
+						});
+					}
+					
+					// Run the duplicate IPs check again
+					check_duplicate_IPs();
+
+				}
+
+			});
+
+		}
+	}
 
 	init();
 
