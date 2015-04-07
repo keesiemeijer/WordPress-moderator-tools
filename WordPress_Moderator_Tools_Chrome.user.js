@@ -1104,7 +1104,7 @@ moderator_tools_with_jquery( function( $ ) {
 				}
 			}
 		} );
-
+        
 		// if no duplicates return
 		if ( $.isEmptyObject( duplicate_IPs ) ) {
 			return;
@@ -1421,27 +1421,37 @@ moderator_tools_with_jquery( function( $ ) {
 					.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
 					.addClass('reviews-total-count--visible');
 				} else {
+                    var i = 1;
+
 					// Toggle the text
 					button
-					.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
-					// also add a toggled classes to target
-					.addClass('reviews-total-count--toggled reviews-total-count--visible');
+                    .text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
+                    // also add a toggled classes to target
+                    .addClass('reviews-total-count--toggled reviews-total-count--visible');
 
 					// Looping each review page
 					for (pageCount; pageCount < lastPage.text(); pageCount++)  {
 
 						// Grab the contents of each review page
-						$.get(url + '/page/' + pageCount, function(data) {
+						$.get(url + '/page/' + (pageCount + 1), function(data) {
 							var reviews = $(data).find('.review');
 
 							// Append the reviews to the current first page
 							container.append(reviews);
-						});
-					}
-					
-					// Run the duplicate IPs check again
-					check_duplicate_IPs();
+                        
+                            // If the final set of reviews have been grabbed
+                            if (i === parseInt(lastPage.text()) - 1) {
+                    
+                                // Fill the Duplicate IP variable with the updated reviews
+                                next_prev_objects = $('.reviewer');
 
+                                // Run the Duplicate IP script again
+                                check_duplicate_IPs();   
+                            }
+
+                            i++;
+						});
+					}  
 				}
 
 			});
