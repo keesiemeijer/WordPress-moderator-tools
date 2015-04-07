@@ -1396,7 +1396,7 @@ moderator_tools_with_jquery( function( $ ) {
 		if (pagination.children().first().hasClass('current')) {
 			var totalReviews = $('.reviews-total-count span[itemprop="reviewCount"]'),
 				totalReviewsCount = totalReviews.text(),
-				button = $('<button class="reviews-total-count">Show ' + totalReviews.text() + ' reviews</button>'),
+				button = $('<button>Show ' + totalReviews.text() + ' reviews</button>'),
 				currentReviews = $('.review').length;
 
 			// Create a button for this filter
