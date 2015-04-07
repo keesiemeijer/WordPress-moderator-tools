@@ -1403,35 +1403,33 @@ moderator_tools_with_jquery( function( $ ) {
 			totalReviews.before(button);
 			totalReviews.remove();
 
-			button.click(function() {
-
+			button.click(function()  {
 				// If all reviews are shown
 				if (button.hasClass('reviews-total-count--visible')) {
 					// Hide the reviews
 					container.hide();
 					button
-					.text('Show ' + totalReviews.text() + ' reviews')
-					.removeClass('reviews-total-count--visible');
+						.text('Show ' + totalReviews.text() + ' reviews')
+						.removeClass('reviews-total-count--visible');
 				} 
 				// If all reviews are hidden but the button has been pressed
 				else if (button.hasClass('reviews-total-count--toggled')) {
 					// Show the reviews
 					container.show();
 					button
-					.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
-					.addClass('reviews-total-count--visible');
+						.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
+						.addClass('reviews-total-count--visible');
 				} else {
                     var i = 1;
 
 					// Toggle the text
 					button
-                    .text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
-                    // also add a toggled classes to target
-                    .addClass('reviews-total-count--toggled reviews-total-count--visible');
+						.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
+						// also add a toggled classes to target
+						.addClass('reviews-total-count--toggled reviews-total-count--visible');
 
 					// Looping each review page
 					for (pageCount; pageCount < lastPage.text(); pageCount++)  {
-
 						// Grab the contents of each review page
 						$.get(url + '/page/' + (pageCount + 1), function(data) {
 							var reviews = $(data).find('.review');
@@ -1441,7 +1439,6 @@ moderator_tools_with_jquery( function( $ ) {
                         
                             // If the final set of reviews have been grabbed
                             if (i === parseInt(lastPage.text()) - 1) {
-                    
                                 // Fill the Duplicate IP variable with the updated reviews
                                 next_prev_objects = $('.reviewer');
 
@@ -1455,10 +1452,8 @@ moderator_tools_with_jquery( function( $ ) {
 				}
 
 			});
-
 		}
 	}
 
 	init();
-
 } );
