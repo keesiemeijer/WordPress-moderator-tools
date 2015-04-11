@@ -1442,6 +1442,9 @@ moderator_tools_with_jquery( function( $ ) {
                                 // Fill the Duplicate IP variable with the updated reviews
                                 next_prev_objects = $('.reviewer');
 
+								// Remove current duplicate IP warnings
+								$('.wpmt_ip-warning').remove();
+
                                 // Run the Duplicate IP script again
                                 check_duplicate_IPs();   
                             }
