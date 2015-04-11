@@ -414,8 +414,6 @@ moderator_tools_with_jquery( function( $ ) {
 			author: '.reviewer-name'
 		};
 
-		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
-
 		// test if duplicate IPs are found
 
 		// var ip1 = next_prev_objects.eq( 0 ).find( '.post-ip-link' ).text();
@@ -424,8 +422,9 @@ moderator_tools_with_jquery( function( $ ) {
 		// }
 
 		check_duplicate_IPs();
-		
 		viewAllReviews();
+
+		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
 	}
 
 
@@ -1394,7 +1393,7 @@ moderator_tools_with_jquery( function( $ ) {
 
 		// Only apply if on the first reviews page
 		if (pagination.children().first().hasClass('current')) {
-			var button = $('<button class="reviews-toggle-all">Show all reviews</button>');
+			var button = $('<button class="button reviews-toggle-all">Show all reviews</button>');
 
 			// Create a button for this filter
 			wrapper.prepend(button);
@@ -1451,6 +1450,25 @@ moderator_tools_with_jquery( function( $ ) {
 				}
 
 			});
+			
+			// Add some CSS
+			styles += 
+				'.reviews-toggle-all { ' +
+					'margin-bottom: 2em;' +
+					 'padding-right: 2em;' +
+					 'position: relative;' +
+				'}' +
+				'.reviews-toggle-all:after {' +
+					 'content: "+";' +
+					 'position: absolute;' +
+					 'right: 10px;' +
+					 'top: 0;' +
+					 'font-family: serif' + 
+					 'font-size: 16px;' +
+				'}' +		
+				'.reviews-toggle-all--visible:after {' +
+					 'content: "-";' +
+				'}';
 		}
 	}
 
