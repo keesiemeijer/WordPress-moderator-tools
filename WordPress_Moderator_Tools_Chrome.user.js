@@ -1394,39 +1394,35 @@ moderator_tools_with_jquery( function( $ ) {
 
 		// Only apply if on the first reviews page
 		if (pagination.children().first().hasClass('current')) {
-			var totalReviews = $('.reviews-total-count span[itemprop="reviewCount"]'),
-				totalReviewsCount = totalReviews.text(),
-				button = $('<button>Show ' + totalReviews.text() + ' reviews</button>'),
-				currentReviews = $('.review').length;
+			var button = $('<button class="reviews-toggle-all">Show all reviews</button>');
 
 			// Create a button for this filter
-			totalReviews.before(button);
-			totalReviews.remove();
+			wrapper.prepend(button);
 
 			button.click(function()  {
 				// If all reviews are shown
-				if (button.hasClass('reviews-total-count--visible')) {
+				if (button.hasClass('reviews-toggle-all--visible')) {
 					// Hide the reviews
 					container.hide();
 					button
-						.text('Show ' + totalReviews.text() + ' reviews')
-						.removeClass('reviews-total-count--visible');
+						.text('Show all reviews')
+						.removeClass('reviews-toggle-all--visible');
 				} 
 				// If all reviews are hidden but the button has been pressed
-				else if (button.hasClass('reviews-total-count--toggled')) {
+				else if (button.hasClass('reviews-toggle-all--toggled')) {
 					// Show the reviews
 					container.show();
 					button
-						.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
-						.addClass('reviews-total-count--visible');
+						.text('Show less reviews')
+						.addClass('reviews-toggle-all--visible');
 				} else {
                     var i = 1;
 
 					// Toggle the text
 					button
-						.text('Hide ' + (parseInt(totalReviewsCount) - currentReviews) + ' reviews')
+						.text('Show less reviews')
 						// also add a toggled classes to target
-						.addClass('reviews-total-count--toggled reviews-total-count--visible');
+						.addClass('reviews-toggle-all--toggled reviews-toggle-all--visible');
 
 					// Looping each review page
 					for (pageCount; pageCount < lastPage.text(); pageCount++)  {
