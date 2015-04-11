@@ -1388,12 +1388,12 @@ moderator_tools_with_jquery( function( $ ) {
 			lastPage = pages.last(),
 			pageCount = 1,
 			url = window.location.href,
-			container = $('<div class="all-reviews_container" />'),
+			container = $('<div class="all-reviews_container" id="all-reviews_container"/>'),
 			wrapper = $('.all-reviews').append(container);
 
 		// Only apply if on the first reviews page
 		if (pagination.children().first().hasClass('current')) {
-			var button = $('<button class="button reviews-toggle-all">Show all reviews</button>');
+			var button = $('<button aria-controls="all-reviews_container"  aria-expanded="false" class="button reviews-toggle-all">All reviews</button>');
 
 			// Create a button for this filter
 			wrapper.prepend(button);
@@ -1404,24 +1404,27 @@ moderator_tools_with_jquery( function( $ ) {
 					// Hide the reviews
 					container.hide();
 					button
-						.text('Show all reviews')
-						.removeClass('reviews-toggle-all--visible');
+						.text('All reviews')
+						.removeClass('reviews-toggle-all--visible')
+						.attr('aria-expanded', false);
 				} 
 				// If all reviews are hidden but the button has been pressed
 				else if (button.hasClass('reviews-toggle-all--toggled')) {
 					// Show the reviews
 					container.show();
 					button
-						.text('Show less reviews')
-						.addClass('reviews-toggle-all--visible');
+						.text('Fewer reviews')
+						.addClass('reviews-toggle-all--visible')
+						.attr('aria-expanded', true);
 				} else {
                     var i = 1;
 
-					// Toggle the text
+					// Update the button attributes accordingly
 					button
-						.text('Show less reviews')
+						.text('Fewer reviews')
 						// also add a toggled classes to target
-						.addClass('reviews-toggle-all--toggled reviews-toggle-all--visible');
+						.addClass('reviews-toggle-all--toggled reviews-toggle-all--visible')
+						.attr('aria-expanded', true);
 
 					// Looping each review page
 					for (pageCount; pageCount < lastPage.text(); pageCount++)  {
