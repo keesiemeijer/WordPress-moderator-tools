@@ -414,8 +414,6 @@ moderator_tools_with_jquery( function( $ ) {
 			author: '.reviewer-name'
 		};
 
-		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
-
 		// test if duplicate IPs are found
 
 		// var ip1 = next_prev_objects.eq( 0 ).find( '.post-ip-link' ).text();
@@ -424,6 +422,9 @@ moderator_tools_with_jquery( function( $ ) {
 		// }
 
 		check_duplicate_IPs();
+		viewAllReviews();
+
+		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
 	}
 
 
@@ -1102,7 +1103,7 @@ moderator_tools_with_jquery( function( $ ) {
 				}
 			}
 		} );
-
+        
 		// if no duplicates return
 		if ( $.isEmptyObject( duplicate_IPs ) ) {
 			return;
@@ -1378,7 +1379,101 @@ moderator_tools_with_jquery( function( $ ) {
 		return 0;
 	}
 
+	/**
+	 * Filter to view all reviews on the first review page 
+	 */ 
+	function viewAllReviews() {
+		var pagination = $('#pages').first(),
+			pages = $(pagination).find('a').not('.next'),
+			lastPage = pages.last(),
+			pageCount = 1,
+			url = window.location.href,
+			container = $('<div class="all-reviews_container" id="all-reviews_container"/>'),
+			wrapper = $('.all-reviews').append(container);
+
+		// Only apply if on the first reviews page
+		if (pagination.children().first().hasClass('current')) {
+			var button = $('<button aria-controls="all-reviews_container"  aria-expanded="false" class="button reviews-toggle-all">All reviews</button>');
+
+			// Create a button for this filter
+			wrapper.prepend(button);
+
+			button.click(function()  {
+				// If all reviews are shown
+				if (button.hasClass('reviews-toggle-all--visible')) {
+					// Hide the reviews
+					container.hide();
+					button
+						.text('All reviews')
+						.removeClass('reviews-toggle-all--visible')
+						.attr('aria-expanded', false);
+				} 
+				// If all reviews are hidden but the button has been pressed
+				else if (button.hasClass('reviews-toggle-all--toggled')) {
+					// Show the reviews
+					container.show();
+					button
+						.text('Fewer reviews')
+						.addClass('reviews-toggle-all--visible')
+						.attr('aria-expanded', true);
+				} else {
+                    var i = 1;
+
+					// Update the button attributes accordingly
+					button
+						.text('Fewer reviews')
+						// also add a toggled classes to target
+						.addClass('reviews-toggle-all--toggled reviews-toggle-all--visible')
+						.attr('aria-expanded', true);
+
+					// Looping each review page
+					for (pageCount; pageCount < lastPage.text(); pageCount++)  {
+						// Grab the contents of each review page
+						$.get(url + '/page/' + (pageCount + 1), function(data) {
+							var reviews = $(data).find('.review');
+
+							// Append the reviews to the current first page
+							container.append(reviews);
+                        
+                            // If the final set of reviews have been grabbed
+                            if (i === parseInt(lastPage.text()) - 1) {
+                                // Fill the Duplicate IP variable with the updated reviews
+                                next_prev_objects = $('.reviewer');
+
+								// Remove current duplicate IP warnings
+								$('.wpmt_ip-warning').remove();
+
+                                // Run the Duplicate IP script again
+                                check_duplicate_IPs();   
+                            }
+
+                            i++;
+						});
+					}  
+				}
+
+			});
+			
+			// Add some CSS
+			styles += 
+				'.reviews-toggle-all { ' +
+					'margin-bottom: 2em;' +
+					 'padding-right: 2em;' +
+					 'position: relative;' +
+				'}' +
+				'.reviews-toggle-all:after {' +
+					 'content: "+";' +
+					 'position: absolute;' +
+					 'right: 10px;' +
+					 'top: 0;' +
+					 'font-family: serif' + 
+					 'font-size: 16px;' +
+				'}' +		
+				'.reviews-toggle-all--visible:after {' +
+					 'content: "-";' +
+				'}';
+		}
+	}
 
 	init();
-
 } );
