@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     3.1
+// @version     3.2
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -23,7 +23,7 @@
 	var select_color = '#e3cebd';
 
 	// Next up variables separated by comma's
-	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;}',
+	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;display:block;} .reviewer .wpmt_ip-warning{display:inline-block;margin-right:1em;}',
 		current_class = 'wpmt_current',
 		bb_admin_url = 'https://wordpress.org/support/bb-admin',
 		shortcuts_title = '<span class="wpmt_shortcuts_title">Shortcuts available for this page:</span>',
@@ -67,6 +67,7 @@
 		x: '%x% - select/deselect "Akismet Never Trust" checkbox',
 		z: '%z% - select/deselect "This user is a bozo" checkbox',
 		z_x: "%z% - go to the next normal profile post | %x% - go to the previous normal profile post",
+		z_x1: "%z% - go to the next user with a duplicate IP | %x% - go to the previous user with a duplicate IP",
 		shift_z_x: "%shift z% - go to the next bozo profile post | %shift x% - go to the previous bozo profile post",
 		t_b: "%t% - go to the top of this page  | %b% - go to the bottom of this page",
 		n_p: "%n% - go to the next post | %p% - go to the previous post",
@@ -132,6 +133,7 @@
 					// wordpress.org/support/view/plugin-reviews/
 					// wordpress.org/support/view/theme-reviews/
 					reviews_init();
+					navigation = false;
 				}
 			}
 
@@ -143,6 +145,7 @@
 			if ( obj_exists( $( '#thread' ) ) ) {
 				// wordpress.org/support/topic
 				topic_init();
+				navigation = false;
 			}
 
 		} else {
@@ -350,11 +353,11 @@
 		};
 
 		// menu style
-		var style = ".wpmt_current .authortitle a {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
+		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
 		// menu shortcuts
-		var shortcut_str = '<p>' + process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcuts.n_p, shortcuts.e4, shortcuts.click_post ] ) + '</p>';
+		var shortcut_str = '<p>' + process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcuts.n_p, shortcuts.z_x1, shortcuts.e4, shortcuts.click_post ] ) + '</p>';
 		shortcuts_top.append( shortcuts_title, menu_close );
 
 		// append menu elements to container
@@ -383,6 +386,10 @@
 			check_duplicate_IPs();
 		}
 
+		duplicate_ip_navigation(); //zx np
+		top_bottom_navigation();
+		menu_navigation();
+
 		add_modlook_profile();
 
 		// functions and event listners for this page	
@@ -398,8 +405,8 @@
 
 	function reviews_init() {
 
-		next_prev_objects = $( ".reviewer" );
-		if ( obj_exists( next_prev_objects ) < 2 ) {
+		next_prev_objects = $( ".review" );
+		if ( obj_exists( next_prev_objects ) < 1 ) {
 			return;
 		}
 
@@ -407,16 +414,43 @@
 			author: '.reviewer-name'
 		};
 
-		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
+		// menu shortcuts
+		var shortcut_str = '<p>' + process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcuts.n_p, shortcuts.z_x1 ] ) + '</p>';
+		shortcuts_top.append( shortcuts_title, menu_close );
+
+		// append menu elements to container
+		menu_container.append( shortcuts_top, shortcut_str );
+
+		// append container to body
+		$( "body" ).append( menu_container );
+		$( '.all-reviews' ).prepend( menu_state );
+		menu_state.wrap( '<p></p>' );
+		show_hide_menu();
+
+		// next previous stuff
+		current_element = 'div.' + current_class;
+
+		// top bottom stuff
+		top_element = $( '#wporg-header' );
+		bottom_element = $( '#wporg-footer' );
 
 		// test if duplicate IPs are found
 
 		// var ip1 = next_prev_objects.eq( 0 ).find( '.post-ip-link' ).text();
 		// if ( obj_exists( next_prev_objects.eq( 1 ) ) ) {
-		// next_prev_objects.eq( 1 ).find( '.post-ip-link' ).text( ip1 );
+		// 	next_prev_objects.eq( 1 ).find( '.post-ip-link' ).text( ip1 );
 		// }
 
 		check_duplicate_IPs();
+		viewAllReviews();
+		duplicate_ip_navigation();
+
+		top_bottom_navigation();
+		menu_navigation();
+
+		styles += ".wpmt_current a.reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}";
+
+		$( "head" ).append( '<style type=\"text/css\">' + styles + '</style>' );
 	}
 
 
@@ -808,6 +842,7 @@
 	}
 
 
+
 	/**
 	 * Scroll navigation to next and previous element
 	 */
@@ -864,6 +899,102 @@
 					}
 
 				}
+			}
+
+		} );
+	}
+
+	/**
+	 * Scroll navigation to next and previous element
+	 */
+	function duplicate_ip_navigation() {
+
+		var current;
+
+		$( 'html' ).bind( 'keydown.wpmt', function( e ) {
+
+			if ( form_focus !== false || ( typeof( next_prev_objects ) === 'undefined' ) ) {
+				return;
+			}
+
+			var count = get_keydown_count( e );
+
+			var key = 0;
+			$.each( {
+				90: 'z',
+				88: 'x',
+				78: 'n',
+				80: 'p'
+			}, function( index, value ) {
+				if ( e.keyCode === parseInt( index ) ) {
+					key = value;
+				}
+
+			} );
+
+			if ( !( key && ( count === 1 ) ) ) {
+				return;
+			}
+
+			var current_obj = obj_exists( $( current_element ) );
+
+			if ( !current_obj && ( ( key === 'n' ) || ( key === 'p' ) ) ) {
+				current = next_prev_objects.first();
+				scrollTo( current );
+				current.addClass( current_class );
+			} else {
+
+				var current = false,
+					warning_pre = false,
+					pre = false;
+
+				next_prev_objects.each( function( index ) {
+					var previous = false,
+						next = false;
+
+					if ( !$( this ).hasClass( current_class ) ) {
+						if ( $( this ).has( ".wpmt_ip-warning" ).length ) {
+							warning_pre = index;
+						}
+						pre = index;
+					}
+
+					if ( $( this ).hasClass( current_class ) ) {
+						current = index;
+
+						if ( key === 'x' && ( warning_pre !== false ) ) {
+							previous = warning_pre;
+						}
+						if ( key === 'p' && ( pre !== false ) ) {
+							previous = pre;
+						}
+
+						if ( previous !== false ) {
+							next_prev_objects.eq( current ).removeClass( current_class );
+							next_prev_objects.eq( previous ).addClass( current_class );
+							scrollTo( next_prev_objects.eq( previous ) );
+							return false;
+						}
+					}
+
+					if ( ( ( current !== false ) && ( current !== index ) ) || !current_obj ) {
+						if ( ( key === 'z' ) && $( this ).has( ".wpmt_ip-warning" ).length ) {
+							next = index;
+						}
+
+						if ( key === 'n' ) {
+							next = index;
+						}
+
+						if ( next !== false ) {
+							next_prev_objects.eq( current ).removeClass( current_class );
+							next_prev_objects.eq( next ).addClass( current_class );
+							scrollTo( next_prev_objects.eq( next ) );
+							return false;
+						}
+					}
+
+				} );
 			}
 
 		} );
@@ -982,7 +1113,6 @@
 
 					if ( ajax ) {
 						var $container = $( this ).children().first( 'a' );
-						// console.dir( $container );
 
 						$.ajax( {
 							url: $container.attr( "href" ) + '/edit',
@@ -1067,19 +1197,30 @@
 	 */
 	function check_duplicate_IPs() {
 
+		// Remove current duplicate IP warnings
+		$( '.wpmt_ip-warning' ).remove();
+
 		var _next_prev_objects = next_prev_objects;
 		var seen = {};
 		var IPs = {};
 		var duplicate_IPs = {};
 
-		// remove duplicate objects with same profile name
+		// remove duplicate objects with same profile name and ip
 		_next_prev_objects = _next_prev_objects.filter( function() {
 
 			var txt = $( this ).find( options.author ).text();
-			if ( seen[ txt ] ) {
+			var ip = $( this ).find( '.post-ip-link' ).text();
+
+			if ( !( txt.length && ip.length ) ) {
+				return false;
+			}
+
+			if ( seen[ txt + ip ] ) {
+				// txt + ip is in seen object
 				return false;
 			} else {
-				seen[ txt ] = true;
+				// txt + ip is not in seen object
+				seen[ txt + ip ] = true;
 				return true;
 			}
 		} );
@@ -1107,7 +1248,7 @@
 			if ( obj_exists( obj ) === 1 ) {
 				var obj_IP = obj.text();
 				if ( duplicate_IPs[ obj_IP ] ) {
-					obj.before( $( '<span class="wpmt_ip-warning">(DUPLICATE IP)</span><br />' ) );
+					obj.before( $( '<span class="wpmt_ip-warning">(DUPLICATE IP)</span>' ) );
 				}
 			}
 		} );
@@ -1132,7 +1273,6 @@
 								dataType: 'html',
 								success: function( html ) {
 									var details = pattern.username.exec( html );
-									// console.dir( details );
 									if ( details.length >= 2 ) {
 										label = details[ 1 ];
 									}
@@ -1371,6 +1511,90 @@
 		return 0;
 	}
 
+	/**
+	 * Filter to view all reviews on the first review page
+	 */
+	function viewAllReviews() {
+		var pagination = $( '#pages' ).first(),
+			pages = $( pagination ).find( 'a' ).not( '.next' ),
+			lastPage = pages.last(),
+			pageCount = 1,
+			url = window.location.href,
+			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
+			wrapper = $( '.all-reviews' ).append( container );
+
+		// Only apply if on the first reviews page
+		if ( pagination.children().first().hasClass( 'current' ) ) {
+			var button = $( '<button aria-controls="all-reviews_container"  aria-expanded="false" class="button reviews-toggle-all">All reviews</button>' );
+
+			// Create a button for this filter
+			wrapper.prepend( button );
+
+			button.click( function() {
+				// If all reviews are shown
+				if ( button.hasClass( 'reviews-toggle-all--visible' ) ) {
+					// Hide the reviews
+					container.hide();
+
+					// Removes the current class for navigation
+					remove_current_class();
+					// Fill the Duplicate IP variable with the original reviews
+					next_prev_objects = $( '.all-reviews > .review' );
+					// Run the Duplicate IP script again
+					check_duplicate_IPs();
+
+					button
+						.text( 'All reviews' )
+						.removeClass( 'reviews-toggle-all--visible' )
+						.attr( 'aria-expanded', false );
+				}
+				// If all reviews are hidden but the button has been pressed
+				else if ( button.hasClass( 'reviews-toggle-all--toggled' ) ) {
+					// Show the reviews
+					container.show();
+					button
+						.text( 'Fewer reviews' )
+						.addClass( 'reviews-toggle-all--visible' )
+						.attr( 'aria-expanded', true );
+				} else {
+					var i = 1;
+
+					// Update the button attributes accordingly
+					button
+						.text( 'Fewer reviews' )
+						// also add a toggled classes to target
+						.addClass( 'reviews-toggle-all--toggled reviews-toggle-all--visible' )
+						.attr( 'aria-expanded', true );
+
+					// Looping each review page
+					for ( pageCount; pageCount < lastPage.text(); pageCount++ ) {
+						// Grab the contents of each review page
+						$.get( url + '/page/' + ( pageCount + 1 ), function( data ) {
+							var reviews = $( data ).find( '.review' );
+
+							// Append the reviews to the current first page
+							container.append( reviews );
+
+							// If the final set of reviews have been grabbed
+							if ( i === parseInt( lastPage.text() ) - 1 ) {
+								// Fill the Duplicate IP variable with the updated reviews
+								next_prev_objects = $( '.review' );
+
+								// Run the Duplicate IP script again
+								check_duplicate_IPs();
+							}
+
+							i++;
+						} );
+					}
+				}
+
+			} );
+
+			// Add some CSS
+			styles += '.reviews-toggle-all {margin-bottom: 2em;padding-right: 2em;position: relative;}.reviews-toggle-all:after {content: "+";position: absolute;right: 10px;top: 0;font-family: seriffont-size: 16px;}.reviews-toggle-all--visible:after {content: "-";}';
+		}
+	}
 
 	init();
 
