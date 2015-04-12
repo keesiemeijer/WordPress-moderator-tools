@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>WordPress Moderator Tools</title>
-    <link rel="stylesheet" href="style.css" type="text/css">
+    <title>WordPress Moderator Tools - Version 3.1</title>
+    <link rel="stylesheet" href="../../style.css" type="text/css">
     <meta name="description" content="WordPress Moderator Tools." />
     <meta name="robots" content="NOINDEX,NOFOLLOW">
 </head>
@@ -14,28 +14,13 @@
 <p>Tools for WordPress dot org forum moderators</p>
 <p>For more tools visit the support handbook <a href="https://make.wordpress.org/support/handbook/appendix/helpful-tools/">helpful tools page</a></p> 
 </div>
-<article class="section">
-<h2>Forum posts (you replied to) in order of activity</h2>
-<p>A tool to display the topics of your WordPress [dot] org Profile Pages in order of activity can be found here:</p>
-<ul>
-<li>Node.js version: <a href="https://forum-activity.herokuapp.com/">https://forum-activity.herokuapp.com/</a></li>
-<li>YQL version: <a href="https://recentforumactivity.herokuapp.com">https://recentforumactivity.herokuapp.com</a></li>
-</ul>
 
-<p><a href="https://github.com/keesiemeijer/recentforumactivity-nodejs">Github development repository</a></p>
-</article>
-<article class="section">
-<h2>WordPress Topic Redirect</h2>
-<p>A <a href="https://addons.mozilla.org/nl/firefox/addon/greasemonkey/">Greasemonkey</a> user script that forces https, adds view=all to topic urls and redirects if needed. Tested in Firefox and Chrome.</p>
-<p>See: <a href="topic-redirect">WordPress Topic Redirect</a></p>
-</article>
-<article class="section">
-<h2>Alfred Workflows (Mac OS X)</h2>
-<p>Two workflows for the <a href="http://www.alfredapp.com/">Alfred app</a> (version 2) to search the WordPress <a href="https://developer.wordpress.org/reference/">developer reference</a> and the Codex <a href="http://codex.wordpress.org/Function_Reference/">function reference</a> can be found <a href="http://www.alfredforum.com/topic/4321-wordpress-developer-reference/">here</a> and <a href="http://www.alfredforum.com/topic/2153-search-the-wordpress-function-reference/">here</a></p>
-</article>
 <article>
-<h2 id="keyboard-navigation">Keyboard navigation. version 3.2</h2>
-<p>Contributors: <a href="https://github.com/keesiemeijer">keesiemeijer</a>, <a href="https://github.com/Clorith">Clorith</a>, <a href="https://github.com/anevins12">anevins</a></p>
+<h2 id="keyboard-navigation">Keyboard navigation. version 3.1</h2>
+</h2>
+<p><strong>Note</strong>: This is not the latest version, check out the latest <a href="/WordPress-moderator-tools#keyboard-navigation">stable release</a>.</p>
+
+<p>Contributors: <a href="https://github.com/keesiemeijer">keesiemeijer</a>, <a href="https://github.com/Clorith">Clorith</a></p>
 <p>A Javascript tool that adds keyboard shortcuts to the following pages.</p>
 <ul>
 	<li>wordpress.org/support/bb-admin/posts.php</li>
@@ -43,16 +28,14 @@
 	<li>wordpress.org/support/profile/profile-name</li>
 	<li>wordpress.org/support/profile/profile-name/edit</li>
 	<li>wordpress.org/support/topic/topic-title</li>
-	<li>wordpress.org/support/view/theme-reviews</li>
-	<li>wordpress.org/support/view/plugin-reviews</li>
 </ul>
 <p>Type m in any of these pages to see what shortcuts are available</a>
 
-<p>This tool appends "&view=all" to topic links where possible in the forums. This allows logged in moderators to see deleted and spam posts in a thread. <a href="#duplicate">Duplicate IPs</a> are detected and you can <a href="#uncapitalize">uncapitalize text</a> with the click of a button. Use a button to see all reviews if a review page is paginated. Ajax is used to make it easier to delete tags, posts or marking posts as not spam. Links to the modlook tag page and the spam queue are added to the mod menu.</p>
-<p><img class="border" src="versions/version-3-2/img/mod_menu.png" alt="" /></p>
+<p>This tool appends "&view=all" to topic links where possible in the forums. This allows logged in moderators to see deleted and spam posts in a thread. <a href="#duplicate">Duplicate IPs</a> are detected and you can <a href="#uncapitalize">uncapitalize text</a> with the click of a button. Ajax is used to make it easier to delete tags, posts or marking posts as not spam. Links to the modlook tag page and the spam queue are added to the mod menu.</p>
+<p><img class="border" src="img/mod_menu.png" alt="" /></p>
 <p>If a user tags a post with "modlook" a link to the users profile page will be added after the tag.</p>
-<p><img class="border" src="versions/version-3-2/img/modlook_tagger.png" alt="" /></p>
-<p>Older versions and changlogs of the scripts can be found at the <a href="versions">Release Archive</a> or <a href="https://github.com/keesiemeijer/WordPress-moderator-tools">Github</a>.</p>
+<p><img class="border" src="img/modlook_tagger.png" alt="" /></p>
+<p>Older versions and changlogs of the scripts can be found at the <a href="../">Release Archive</a> or <a href="https://github.com/keesiemeijer/WordPress-moderator-tools">Github</a>.</p>
 
 <h3>installation</h3>
 <p>This tool can be installed in three ways, as a Javascript bookmarklet, a Firefox add-on, or a <a href="https://addons.mozilla.org/nl/firefox/addon/greasemonkey/">Greasemonkey</a> user script (Firefox, Chrome). The add-on and user scripts run automatically on the specific pages and the bookmarklet has to be clicked from the browser bookmark menu.</p>
@@ -65,26 +48,26 @@
 </article>
 <article>
 <h3>Firefox add-on</h3>
-<p>Click to install the <a href="versions/version-3-2/wordpressmoderatortools.xpi">Firefox Addon</a></p>
-<p>Or download the <a href="versions/version-3-2/wordpressmoderatortools.xpi.zip">Firefox Addon</a> and add it manually.</p>
+<p>Click to install the <a href="wordpressmoderatortools.xpi">Firefox Addon</a></p>
+<p>Or download the <a href="wordpressmoderatortools.xpi.zip">Firefox Addon</a> and add it manually.</p>
 <p>Restart Firefox for the add-on to be activated. </p><p><strong>Note</strong>: Remove earlier versions (if you have them) from the Firefox add-on page.</p>
-<p>The add-on was created by this <a href="https://arantius.com/misc/greasemonkey/script-compiler.php">Greasemonkey script compiler</a>.<br/>Code used in the compiler: <a href="versions/version-3-2/WordPress_Moderator_Tools_Chrome_min.js">wp_moderator_shortcuts.js</a></p>
+<p>The add-on was created by this <a href="https://arantius.com/misc/greasemonkey/script-compiler.php">Greasemonkey script compiler</a>.<br/>Code used in the compiler: <a href="WordPress_Moderator_Tools_Chrome_min.js">wp_moderator_shortcuts.js</a></p>
 </article>
 <article>
 <h3>Firefox Greasemonkey script</h3>
 <p>Install <a href="https://addons.mozilla.org/nl/firefox/addon/greasemonkey/">Greasemonkey</a> (If you haven't done so already).</p>
-<p>Click to install the: <a href="versions/version-3-2/WordPress_Moderator_Tools_Firefox_min.user.js">Firefox Greasemonkey user script</a></p>
+<p>Click to install the: <a href="WordPress_Moderator_Tools_Firefox_min.user.js">Firefox Greasemonkey user script</a></p>
 </article>
 <article class="section">
 <h3>Chrome Greasemonkey script</h3>
 <p>(No need to install Greasemonkey)</p>
 <ol>
-	<li>Click this <a href="versions/version-3-2/WordPress_Moderator_Tools_Chrome_min.user.js">Chrome Greasemonkey user script</a> (Chrome will download the script, because it doesn't allow scripts to be added outside the Chrome Web Store)</li>
+	<li>Click this <a href="WordPress_Moderator_Tools_Chrome_min.user.js">Chrome Greasemonkey user script</a> (Chrome will download the script, because it doesn't allow scripts to be added outside the Chrome Web Store)</li>
 	<li>Go to "Window" > "Extensions"</li>
 	<li>Drop the "wp_greasemonkey_Chrome.user.js" file in the "Extensions" page</li>
 	<li>Click "Add"</li>
 </ol>
-<p>Download the <a href="versions/version-3-2/WordPress_Moderator_Tools_Chrome_min.user.js.zip">user script</a> if it doesn't install. Unzip it and drop the file in the Chrome "Extensions" page.</p>
+<p>Download the <a href="WordPress_Moderator_Tools_Chrome_min.user.js.zip">user script</a> if it doesn't install. Unzip it and drop the file in the Chrome "Extensions" page.</p>
 
 <p>Alternative methods:</p>
 	<p>Use the <a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo">Tampermonkey</a> Chrome extension to manage your user scripts.(thanks Jan!). The extension allows scripts to be added outside the Chrome Web Store directly.</p>
@@ -96,35 +79,31 @@
 </article>
 <article>
 <h4 id="menu-admin-posts">wordpress.org/support/bb-admin/posts.php<br/>wordpress.org/support/bb-admin/topics.php</h4>
-<p>The menu.<br/><img src="versions/version-3-2/img/menu.png" alt="" /><br/><br/>Clicking "shortcuts" or typing "h" displays all shortcuts available for that page.<br/><img src="versions/version-3-2/img/shortcuts.png" alt="" /><br/>The <strong>current post</strong> is marked by a grey border.</p>
+<p>The menu.<br/><img src="img/menu.png" alt="" /><br/><br/>Clicking "shortcuts" or typing "h" displays all shortcuts available for that page.<br/><img src="img/shortcuts.png" alt="" /><br/>The <strong>current post</strong> is marked by a grey border.</p>
 <p>In these pages an "Edit Profile" link is automatically added to all posts.</p>
-<p><img src="versions/version-3-2/img/editprofile.png" alt="" /></p>
+<p><img src="img/editprofile.png" alt="" /></p>
 <p>You can select a post by clicking in the author column. The author column gets a new background color when the post is selected (for visibility).</p>
-<p><img src="versions/version-3-2/img/profileselected.png" alt="" /></p>
+<p><img src="img/profileselected.png" alt="" /></p>
 <p>In the spam queue b-tagged and Akismet Never Trust users are shown with a red background.</p>
-<p><img src="versions/version-3-2/img/bozo-ant.png" alt="" /></p>
+<p><img src="img/bozo-ant.png" alt="" /></p>
 <h4 id="menu-profile-edit">Menu wordpress.org/support/profile/profile-name/edit</h4>
-<p><img src="versions/version-3-2/img/edit-profile.png" alt="" /></p>
+<p><img src="img/edit-profile.png" alt="" /></p>
 <h4 id="menu-profile">Menu wordpress.org/support/profile/profile-name</h4>
-<p><img src="versions/version-3-2/img/profile.png" alt="" /></p>
+<p><img src="img/profile.png" alt="" /></p>
 <h4 id="menu-topic">Menu wordpress.org/support/topic/topic-title</h4>
-<p><img src="versions/version-3-2/img/topic.png" alt="" /><br/>The <strong>current post</strong> is marked by a grey background color for the "User Type"<br/><img src="versions/version-3-2/img/current.png" alt="" /></p>
-
-<h4 id="menu-admin-posts">wordpress.org/support/view/theme-reviews<br/>wordpress.org/support/view/plugin-reviews</h4>
-<p><img src="versions/version-3-2/img/review.png" alt="" /></p>
-
+<p><img src="img/topic.png" alt="" /><br/>The <strong>current post</strong> is marked by a grey background color for the "User Type"<br/><img src="img/current.png" alt="" /></p>
 <p>Go and play and test all the shortcuts for yourself.</p>
 </article>
 <article>
 <h3 id="duplicate">Duplicate IP's</h3>
 <h4>wordpress.org/support/topic/topic-title</h4>
-<p>If a thread contains duplicate IP's for different users it will show a warning <span style="color:red;">(DUPLICATE IP)</span> in all posts with the duplicate IP. Be aware that users with the same IP doesn't necessarily mean the users are gaming the system.<br/><img src="versions/version-3-2/img/duplicate-ip.png" alt="" /></p> 
+<p>If a thread contains duplicate IP's for different users it will show a warning <span style="color:red;">(DUPLICATE IP)</span> in all posts with the duplicate IP. Be aware that users with the same IP doesn't necessarily mean the users are gaming the system.<br/><img src="img/duplicate-ip.png" alt="" /></p> 
 </article>
 <article class="section">
 <h3 id="uncapitalize">Uncapitalize selected text</h3>
 <h4>wordpress.org/support/edit.php</h4>
 <p>A button is added to the post editor to uncapitalize selected text. This button can be used for the post text and the topic title</p>
-<p>Example before selecting text and clicking the button.<br/><img class="border" src="versions/version-3-2/img/l-case.png" alt="" /><br/>After.<br/><img class="border" src="versions/version-3-2/img/l-case-after.png" alt="" /></p>
+<p>Example before selecting text and clicking the button.<br/><img class="border" src="img/l-case.png" alt="" /><br/>After.<br/><img class="border" src="img/l-case-after.png" alt="" /></p>
 </article>
 <article class="section">
 <h2>Defaults</h2>
