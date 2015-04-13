@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     3.2
+// @version     3.2.1
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -47,6 +47,8 @@ moderator_tools_with_jquery( function( $ ) {
 		is_admin = false,
 		logged_in = false,
 		ajax = true,
+		_reviews,
+		_all_reviews,
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
@@ -413,6 +415,7 @@ moderator_tools_with_jquery( function( $ ) {
 	function reviews_init() {
 
 		next_prev_objects = $( ".review" );
+		_reviews = next_prev_objects;
 		if ( obj_exists( next_prev_objects ) < 1 ) {
 			return;
 		}
@@ -1542,11 +1545,10 @@ moderator_tools_with_jquery( function( $ ) {
 				if ( button.hasClass( 'reviews-toggle-all--visible' ) ) {
 					// Hide the reviews
 					container.hide();
-
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with the original reviews
-					next_prev_objects = $( '.all-reviews > .review' );
+					// Fill the Duplicate IP variable with the original reviews set in reviews_init()
+					next_prev_objects = _reviews;
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1559,6 +1561,14 @@ moderator_tools_with_jquery( function( $ ) {
 				else if ( button.hasClass( 'reviews-toggle-all--toggled' ) ) {
 					// Show the reviews
 					container.show();
+
+					// Removes the current class for navigation
+					remove_current_class();
+					// Fill the Duplicate IP variable with all the reviews
+					next_prev_objects = _all_reviews;
+					// Run the Duplicate IP script again
+					check_duplicate_IPs();
+
 					button
 						.text( 'Fewer reviews' )
 						.addClass( 'reviews-toggle-all--visible' )
@@ -1586,6 +1596,7 @@ moderator_tools_with_jquery( function( $ ) {
 							if ( i === parseInt( lastPage.text() ) - 1 ) {
 								// Fill the Duplicate IP variable with the updated reviews
 								next_prev_objects = $( '.review' );
+								_all_reviews = next_prev_objects;
 
 								// Run the Duplicate IP script again
 								check_duplicate_IPs();
