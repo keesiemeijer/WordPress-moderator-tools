@@ -130,6 +130,7 @@ moderator_tools_with_jquery( function( $ ) {
 				if ( obj_exists( $( '.edit-form' ) ) ) {
 					// wordpress.org/support/edit.php
 					add_lower_case_button_to_editor();
+					add_strip_links_button_to_editor();
 					navigation = false;
 				}
 
@@ -1613,6 +1614,48 @@ moderator_tools_with_jquery( function( $ ) {
 			styles += '.reviews-toggle-all {margin-bottom: 2em;padding-right: 2em;position: relative;}.reviews-toggle-all:after {content: "+";position: absolute;right: 10px;top: 0;font-family: seriffont-size: 16px;}.reviews-toggle-all--visible:after {content: "-";}';
 		}
 	}
-
+	
+	/**
+	 * Adds a button to strip out links when editing a review
+	 * wordpress.org/support/edit.php
+	 */
+	 function add_strip_links_button_to_editor() {
+		var button = $( '<input class="ed_button" type="button" value="strip links" />' );
+		
+		function addBtn() {
+			var toolbar = $( '#ed_toolbar' );
+	 
+			toolbar.append(button);
+		}
+		
+		function removeLinks() {
+			var post = $( '#post_content' ),
+				postContent = post.val(),
+				replaceContent = '<em>[Link redacted]</em>',
+				updatedContent,
+				matches = {
+					'link': /<a.*?<\/a>/gi,
+					'http': /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi,
+					'www': /(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi
+				};
+		   
+		   // Run the Regex to remove the links
+			updatedContent = postContent
+				 .replace( matches.link, replaceContent )
+				 .replace( matches.http, replaceContent )
+				 .replace( matches.www, replaceContent );
+	 
+			// Update the post content 
+			post.html( updatedContent );
+		}
+	 
+		addBtn();
+	   
+		button.click(function( event ) {
+			removeLinks();
+		});
+	}	 
+	 
 	init();
+
 } );
