@@ -1646,7 +1646,7 @@ moderator_tools_with_jquery( function( $ ) {
 				 .replace( matches.www, replaceContent );
 	 
 			// Update the post content 
-			post.html( updatedContent );
+			post.val( updatedContent );
 		}
 	 
 		addBtn();
