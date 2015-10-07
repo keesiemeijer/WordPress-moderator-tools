@@ -241,6 +241,10 @@ moderator_tools_with_jquery( function( $ ) {
 
 		// event listeners for this page
 		bb_admin_posts_event_listeners();
+		
+		// Show hidden links
+		var posts = $('.post p:first-child');
+		showHiddenLinks(posts);
 	}
 
 
@@ -408,6 +412,12 @@ moderator_tools_with_jquery( function( $ ) {
 		// set first post as current if only one post
 		if ( next_prev_objects.length === 1 ) {
 			next_prev_objects.first().trigger( 'click.wpmt' );
+		}
+		
+		// Show hidden links
+		if ($('#thread').length !== 0) {
+			var posts = $('.threadpost .post');        
+			showHiddenLinks(posts);
 		}
 
 	}
@@ -1653,6 +1663,34 @@ moderator_tools_with_jquery( function( $ ) {
 	   
 		button.click(function( event ) {
 			removeLinks();
+		});
+	}
+	
+	/**
+	 * Makes visible links that would otherwise be hidden
+	 */
+	function showHiddenLinks(posts) {
+		var style = 'border: 2px solid gold; display: inline-block; margin: 5px; padding: 5px;';
+	 
+		posts.each(function() {
+			post = $(this);
+			
+			links = post.find('a');
+
+			links.each(function() {
+				var link = $(this);
+
+				if (link.text() == '') {
+
+					// Get the HTML of the link
+					link.text(link[0].outerHTML);
+					// Output it on the page
+					post.append('<pre style="' + style +'">' + link.html() + '</pre>');
+
+					// Hide the original link
+					link.hide();
+				}
+			});  
 		});
 	}	 
 	 
