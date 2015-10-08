@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     3.2.1
+// @version     4.0.0
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -47,8 +47,7 @@ moderator_tools_with_jquery( function( $ ) {
 		is_admin = false,
 		logged_in = false,
 		ajax = true,
-		_reviews,
-		_all_reviews,
+		review_filter='',
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
@@ -142,6 +141,7 @@ moderator_tools_with_jquery( function( $ ) {
 				if ( obj_exists( $( '.all-reviews' ) ) ) {
 					// wordpress.org/support/view/plugin-reviews/
 					// wordpress.org/support/view/theme-reviews/
+					review_filter = getParameterByName( 'filter' );
 					reviews_init();
 					navigation = false;
 				}
@@ -426,7 +426,6 @@ moderator_tools_with_jquery( function( $ ) {
 	function reviews_init() {
 
 		next_prev_objects = $( ".review" );
-		_reviews = next_prev_objects;
 		if ( obj_exists( next_prev_objects ) < 1 ) {
 			return;
 		}
@@ -756,7 +755,9 @@ moderator_tools_with_jquery( function( $ ) {
 					async: true,
 					dataType: 'html',
 					success: function( html ) {
-						$parent.fadeOut();
+						$parent.fadeOut(300, function() {
+							$(this).remove();
+						});
 					}
 				} );
 			} );
@@ -1522,6 +1523,14 @@ moderator_tools_with_jquery( function( $ ) {
 	}
 
 
+	function getParameterByName(name) {
+		name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+		var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		results = regex.exec(location.search);
+		return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
+
+
 	/**
 	 * Checks if an object exists
 	 */
@@ -1540,7 +1549,8 @@ moderator_tools_with_jquery( function( $ ) {
 			pages = $( pagination ).find( 'a' ).not( '.next' ),
 			lastPage = pages.last(),
 			pageCount = 1,
-			url = window.location.href,
+			location = window.location.href,
+			url=location.split("?")[0],
 			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
 			wrapper = $( '.all-reviews' ).append( container );
 
@@ -1558,8 +1568,8 @@ moderator_tools_with_jquery( function( $ ) {
 					container.hide();
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with the original reviews set in reviews_init()
-					next_prev_objects = _reviews;
+					// Fill the Duplicate IP variable with the original reviews
+					next_prev_objects = $( '.all-reviews > .review' );
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1575,8 +1585,7 @@ moderator_tools_with_jquery( function( $ ) {
 
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with all the reviews
-					next_prev_objects = _all_reviews;
+					
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1596,8 +1605,15 @@ moderator_tools_with_jquery( function( $ ) {
 
 					// Looping each review page
 					for ( pageCount; pageCount < lastPage.text(); pageCount++ ) {
+						var filter = '';
+
+						if(review_filter.length) {
+							filter="?filter="+review_filter;
+						}
+
 						// Grab the contents of each review page
-						$.get( url + '/page/' + ( pageCount + 1 ), function( data ) {
+
+						$.get( url + '/page/' + ( pageCount + 1 ) + filter, function( data ) {
 							var reviews = $( data ).find( '.review' );
 
 							// Append the reviews to the current first page
@@ -1607,7 +1623,6 @@ moderator_tools_with_jquery( function( $ ) {
 							if ( i === parseInt( lastPage.text() ) - 1 ) {
 								// Fill the Duplicate IP variable with the updated reviews
 								next_prev_objects = $( '.review' );
-								_all_reviews = next_prev_objects;
 
 								// Run the Duplicate IP script again
 								check_duplicate_IPs();

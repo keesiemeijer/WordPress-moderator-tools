@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     3.2.1
+// @version     4.0.0
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -40,8 +40,7 @@
 		is_admin = false,
 		logged_in = false,
 		ajax = true,
-		_reviews,
-		_all_reviews,
+		review_filter='',
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
@@ -123,6 +122,7 @@
 				if ( obj_exists( $( '.edit-form' ) ) ) {
 					// wordpress.org/support/edit.php
 					add_lower_case_button_to_editor();
+					add_strip_links_button_to_editor();
 					navigation = false;
 				}
 
@@ -134,6 +134,7 @@
 				if ( obj_exists( $( '.all-reviews' ) ) ) {
 					// wordpress.org/support/view/plugin-reviews/
 					// wordpress.org/support/view/theme-reviews/
+					review_filter = getParameterByName( 'filter' );
 					reviews_init();
 					navigation = false;
 				}
@@ -233,6 +234,10 @@
 
 		// event listeners for this page
 		bb_admin_posts_event_listeners();
+		
+		// Show hidden links
+		var posts = $('.post p:first-child');
+		showHiddenLinks(posts);
 	}
 
 
@@ -401,6 +406,12 @@
 		if ( next_prev_objects.length === 1 ) {
 			next_prev_objects.first().trigger( 'click.wpmt' );
 		}
+		
+		// Show hidden links
+		if ($('#thread').length !== 0) {
+			var posts = $('.threadpost .post');        
+			showHiddenLinks(posts);
+		}
 
 	}
 
@@ -408,7 +419,6 @@
 	function reviews_init() {
 
 		next_prev_objects = $( ".review" );
-		_reviews = next_prev_objects;
 		if ( obj_exists( next_prev_objects ) < 1 ) {
 			return;
 		}
@@ -738,7 +748,9 @@
 					async: true,
 					dataType: 'html',
 					success: function( html ) {
-						$parent.fadeOut();
+						$parent.fadeOut(300, function() {
+							$(this).remove();
+						});
 					}
 				} );
 			} );
@@ -1504,6 +1516,14 @@
 	}
 
 
+	function getParameterByName(name) {
+		name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+		var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		results = regex.exec(location.search);
+		return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
+
+
 	/**
 	 * Checks if an object exists
 	 */
@@ -1522,7 +1542,8 @@
 			pages = $( pagination ).find( 'a' ).not( '.next' ),
 			lastPage = pages.last(),
 			pageCount = 1,
-			url = window.location.href,
+			location = window.location.href,
+			url=location.split("?")[0],
 			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
 			wrapper = $( '.all-reviews' ).append( container );
 
@@ -1540,8 +1561,8 @@
 					container.hide();
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with the original reviews set in reviews_init()
-					next_prev_objects = _reviews;
+					// Fill the Duplicate IP variable with the original reviews
+					next_prev_objects = $( '.all-reviews > .review' );
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1557,8 +1578,7 @@
 
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with all the reviews
-					next_prev_objects = _all_reviews;
+					
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1578,8 +1598,15 @@
 
 					// Looping each review page
 					for ( pageCount; pageCount < lastPage.text(); pageCount++ ) {
+						var filter = '';
+
+						if(review_filter.length) {
+							filter="?filter="+review_filter;
+						}
+
 						// Grab the contents of each review page
-						$.get( url + '/page/' + ( pageCount + 1 ), function( data ) {
+
+						$.get( url + '/page/' + ( pageCount + 1 ) + filter, function( data ) {
 							var reviews = $( data ).find( '.review' );
 
 							// Append the reviews to the current first page
@@ -1589,7 +1616,6 @@
 							if ( i === parseInt( lastPage.text() ) - 1 ) {
 								// Fill the Duplicate IP variable with the updated reviews
 								next_prev_objects = $( '.review' );
-								_all_reviews = next_prev_objects;
 
 								// Run the Duplicate IP script again
 								check_duplicate_IPs();
@@ -1606,7 +1632,76 @@
 			styles += '.reviews-toggle-all {margin-bottom: 2em;padding-right: 2em;position: relative;}.reviews-toggle-all:after {content: "+";position: absolute;right: 10px;top: 0;font-family: seriffont-size: 16px;}.reviews-toggle-all--visible:after {content: "-";}';
 		}
 	}
+	
+	/**
+	 * Adds a button to strip out links when editing a review
+	 * wordpress.org/support/edit.php
+	 */
+	 function add_strip_links_button_to_editor() {
+		var button = $( '<input class="ed_button" type="button" value="strip links" />' );
+		
+		function addBtn() {
+			var toolbar = $( '#ed_toolbar' );
+	 
+			toolbar.append(button);
+		}
+		
+		function removeLinks() {
+			var post = $( '#post_content' ),
+				postContent = post.val(),
+				replaceContent = '<em>[Link redacted]</em>',
+				updatedContent,
+				matches = {
+					'link': /<a.*?<\/a>/gi,
+					'http': /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi,
+					'www': /(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi
+				};
+		   
+		   // Run the Regex to remove the links
+			updatedContent = postContent
+				 .replace( matches.link, replaceContent )
+				 .replace( matches.http, replaceContent )
+				 .replace( matches.www, replaceContent );
+	 
+			// Update the post content 
+			post.val( updatedContent );
+		}
+	 
+		addBtn();
+	   
+		button.click(function( event ) {
+			removeLinks();
+		});
+	}
+	
+	/**
+	 * Makes visible links that would otherwise be hidden
+	 */
+	function showHiddenLinks(posts) {
+		var style = 'border: 2px solid gold; content: "(hidden)" display: inline-block; margin: 5px; padding: 5px;';
+	 
+		posts.each(function() {
+			post = $(this);
+			
+			links = post.find('a');
 
+			links.each(function() {
+				var link = $(this);
+
+				if (link.text() == '') {
+
+					// Get the HTML of the link
+					link.text(link[0].outerHTML);
+					// Output it on the page
+					post.append('<pre style="' + style +'">' + link.html() + '</pre>');
+
+					// Hide the original link
+					link.hide();
+				}
+			});  
+		});
+	}	 
+	 
 	init();
 
 } )( jQuery );
