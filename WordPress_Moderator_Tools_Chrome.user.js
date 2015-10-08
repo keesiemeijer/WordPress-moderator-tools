@@ -1670,7 +1670,7 @@ moderator_tools_with_jquery( function( $ ) {
 	 * Makes visible links that would otherwise be hidden
 	 */
 	function showHiddenLinks(posts) {
-		var style = 'border: 2px solid gold; display: inline-block; margin: 5px; padding: 5px;';
+		var style = 'border: 2px solid gold; content: "(hidden)" display: inline-block; margin: 5px; padding: 5px;';
 	 
 		posts.each(function() {
 			post = $(this);
