@@ -1762,11 +1762,14 @@ moderator_tools_with_jquery( function( $ ) {
 				var form = $(this),
 					input = form.find('#mod-tools-check-ips').val(),
 					input_IPs = input.split(' '),
-					document_ips = $('.post-ip-link');      
+					document_ips = $('.post-ip-link'),
+                    no_matches = true;					
 				
-				
+				// Reset results
 				match_summary_list.remove();
 				match_summary_list = $('<ol />');
+				// Reset styles
+				$('.mod-tools-ip-matched').removeClass('mod-tools-ip-matched');
 
 				// For each IP in the DOM
 				document_ips.each(function(i, v) {
@@ -1781,9 +1784,18 @@ moderator_tools_with_jquery( function( $ ) {
 						match_summary_list.append('<li><a href="#' + id + '">' + document_IP.text() + '</a></li>');
 						// - Add a class to style the IP
 						document_IP.addClass('mod-tools-ip-matched').attr('id', id);
+                        
+                        // Flag
+                        no_matches = false;
 					} 
 				});
 
+                // No results
+                if (no_matches) {
+                    match_summary_list.append('<li>No matches</li>');
+                }
+                
+                // Add results to the DOM
 				form.after(match_summary_list);
 				
 				return form;
