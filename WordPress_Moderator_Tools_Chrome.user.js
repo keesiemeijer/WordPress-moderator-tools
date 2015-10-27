@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     3.2.1
+// @version     4.0.1
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -30,7 +30,7 @@ moderator_tools_with_jquery( function( $ ) {
 	var select_color = '#e3cebd';
 
 	// Next up variables separated by comma's
-	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;display:block;} .reviewer .wpmt_ip-warning{display:inline-block;margin-right:1em;}',
+	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;display:block;} .reviewer .wpmt_ip-warning{display:inline-block;margin-right:1em;}.wpmt_screen_reader_text{clip: rect(1px, 1px, 1px, 1px);position: absolute !important;height: 1px;width: 1px;overflow: hidden;}',
 		current_class = 'wpmt_current',
 		bb_admin_url = 'https://wordpress.org/support/bb-admin',
 		shortcuts_title = '<span class="wpmt_shortcuts_title">Shortcuts available for this page:</span>',
@@ -47,8 +47,7 @@ moderator_tools_with_jquery( function( $ ) {
 		is_admin = false,
 		logged_in = false,
 		ajax = true,
-		_reviews,
-		_all_reviews,
+		review_filter = '',
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
@@ -142,6 +141,7 @@ moderator_tools_with_jquery( function( $ ) {
 				if ( obj_exists( $( '.all-reviews' ) ) ) {
 					// wordpress.org/support/view/plugin-reviews/
 					// wordpress.org/support/view/theme-reviews/
+					review_filter = getParameterByName( 'filter' );
 					reviews_init();
 					navigation = false;
 				}
@@ -241,6 +241,10 @@ moderator_tools_with_jquery( function( $ ) {
 
 		// event listeners for this page
 		bb_admin_posts_event_listeners();
+
+		// Show hidden links
+		var posts = $( '.post' );
+		showHiddenLinks( posts );
 	}
 
 
@@ -410,13 +414,18 @@ moderator_tools_with_jquery( function( $ ) {
 			next_prev_objects.first().trigger( 'click.wpmt' );
 		}
 
+		// Show hidden links to moderators
+		if ( ( $( '#thread' ).length !== 0 ) && obj_exists( $( '.mod-login' ) ) ) {
+			var posts = $( '.threadpost .post' );
+			showHiddenLinks( posts );
+		}
+
 	}
 
 
 	function reviews_init() {
 
 		next_prev_objects = $( ".review" );
-		_reviews = next_prev_objects;
 		if ( obj_exists( next_prev_objects ) < 1 ) {
 			return;
 		}
@@ -747,7 +756,9 @@ moderator_tools_with_jquery( function( $ ) {
 					async: true,
 					dataType: 'html',
 					success: function( html ) {
-						$parent.fadeOut();
+						$parent.fadeOut( 300, function() {
+							$( this ).remove();
+						} );
 					}
 				} );
 			} );
@@ -1513,6 +1524,14 @@ moderator_tools_with_jquery( function( $ ) {
 	}
 
 
+	function getParameterByName( name ) {
+		name = name.replace( /[\[]/, "\\[" ).replace( /[\]]/, "\\]" );
+		var regex = new RegExp( "[\\?&]" + name + "=([^&#]*)" ),
+			results = regex.exec( location.search );
+		return results === null ? "" : decodeURIComponent( results[ 1 ].replace( /\+/g, " " ) );
+	}
+
+
 	/**
 	 * Checks if an object exists
 	 */
@@ -1531,7 +1550,8 @@ moderator_tools_with_jquery( function( $ ) {
 			pages = $( pagination ).find( 'a' ).not( '.next' ),
 			lastPage = pages.last(),
 			pageCount = 1,
-			url = window.location.href,
+			location = window.location.href,
+			url = location.split( "?" )[ 0 ],
 			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
 			wrapper = $( '.all-reviews' ).append( container );
 
@@ -1549,8 +1569,8 @@ moderator_tools_with_jquery( function( $ ) {
 					container.hide();
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with the original reviews set in reviews_init()
-					next_prev_objects = _reviews;
+					// Fill the Duplicate IP variable with the original reviews
+					next_prev_objects = $( '.all-reviews > .review' );
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1566,8 +1586,7 @@ moderator_tools_with_jquery( function( $ ) {
 
 					// Removes the current class for navigation
 					remove_current_class();
-					// Fill the Duplicate IP variable with all the reviews
-					next_prev_objects = _all_reviews;
+
 					// Run the Duplicate IP script again
 					check_duplicate_IPs();
 
@@ -1587,8 +1606,15 @@ moderator_tools_with_jquery( function( $ ) {
 
 					// Looping each review page
 					for ( pageCount; pageCount < lastPage.text(); pageCount++ ) {
+						var filter = '';
+
+						if ( review_filter.length ) {
+							filter = "?filter=" + review_filter;
+						}
+
 						// Grab the contents of each review page
-						$.get( url + '/page/' + ( pageCount + 1 ), function( data ) {
+
+						$.get( url + '/page/' + ( pageCount + 1 ) + filter, function( data ) {
 							var reviews = $( data ).find( '.review' );
 
 							// Append the reviews to the current first page
@@ -1598,7 +1624,6 @@ moderator_tools_with_jquery( function( $ ) {
 							if ( i === parseInt( lastPage.text() ) - 1 ) {
 								// Fill the Duplicate IP variable with the updated reviews
 								next_prev_objects = $( '.review' );
-								_all_reviews = next_prev_objects;
 
 								// Run the Duplicate IP script again
 								check_duplicate_IPs();
@@ -1615,20 +1640,20 @@ moderator_tools_with_jquery( function( $ ) {
 			styles += '.reviews-toggle-all {margin-bottom: 2em;padding-right: 2em;position: relative;}.reviews-toggle-all:after {content: "+";position: absolute;right: 10px;top: 0;font-family: seriffont-size: 16px;}.reviews-toggle-all--visible:after {content: "-";}';
 		}
 	}
-	
+
 	/**
 	 * Adds a button to strip out links when editing a review
 	 * wordpress.org/support/edit.php
 	 */
-	 function add_strip_links_button_to_editor() {
+	function add_strip_links_button_to_editor() {
 		var button = $( '<input class="ed_button" type="button" value="strip links" />' );
-		
+
 		function addBtn() {
 			var toolbar = $( '#ed_toolbar' );
-	 
-			toolbar.append(button);
+
+			toolbar.append( button );
 		}
-		
+
 		function removeLinks() {
 			var post = $( '#post_content' ),
 				postContent = post.val(),
@@ -1639,22 +1664,78 @@ moderator_tools_with_jquery( function( $ ) {
 					'http': /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi,
 					'www': /(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi
 				};
-		   
-		   // Run the Regex to remove the links
+
+			// Run the Regex to remove the links
 			updatedContent = postContent
-				 .replace( matches.link, replaceContent )
-				 .replace( matches.http, replaceContent )
-				 .replace( matches.www, replaceContent );
-	 
+				.replace( matches.link, replaceContent )
+				.replace( matches.http, replaceContent )
+				.replace( matches.www, replaceContent );
+
 			// Update the post content 
 			post.val( updatedContent );
 		}
-	 
+
 		addBtn();
-	   
-		button.click(function( event ) {
+
+		button.click( function( event ) {
 			removeLinks();
 		});
+	}
+
+	/**
+	 * Makes visible links that would otherwise be hidden
+	 */
+	function showHiddenLinks( posts ) {
+
+		var hidden_style = 'border: 2px solid gold; display: inline-block; margin: 5px; padding: 5px;';
+
+		posts.each( function() {
+			var post = $( this );
+
+			// find hidden links;
+			var hidden_links = post.find( 'a' ).filter( function( index ) {
+				var text = $.trim( $( this ).text() );
+				if( text == '' ){
+					return true;
+				} else if ( text.length < 3 ) {
+					return true;
+				}
+				return false;
+			} );
+
+			if ( !obj_exists( hidden_links ) ) {
+				return true;
+			}
+
+			var link_container = $( '<div><span class="wpmt_screen_reader_text">Hidden links, or links with less than 3 characters found in post content</span></div>' );
+
+			hidden_links.each( function() {
+
+				var link = $( this );
+				var admin_style = is_admin ? 'font-size:1.4em;' : '';
+
+				// Get the HTML of the link
+				link.text( link[ 0 ].outerHTML );
+				var pre = $( '<pre style="' + hidden_style + admin_style + '">' + link.html() + '</pre>' );
+				link_container.append( pre );
+
+				// Hide the original link
+				link.hide();
+
+			} );
+
+			// Output it on the page
+			if ( is_admin ) {
+				var row_actions = $( '.row-actions', post ).parent();
+				if ( obj_exists( row_actions ) ) {
+					row_actions.before( link_container );
+				} else {
+					post.append( link_container );
+				}
+			} else {
+				post.append( link_container );
+			}
+		} );
 	}	 
 	
 	
@@ -1724,7 +1805,6 @@ moderator_tools_with_jquery( function( $ ) {
 		
 		init();
 	}
-	 
-	init();
 
+	init();
 } );
