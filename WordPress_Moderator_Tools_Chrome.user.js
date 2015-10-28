@@ -202,6 +202,8 @@ moderator_tools_with_jquery( function( $ ) {
 
 		// menu style
 		var style = 'table.widefat tr.wpmt_current td{border:solid #9f9f9f;border-width:2px 0}table.widefat tr.wpmt_current td.check-column{border-left:2px solid #9f9f9f}table#posts-list tr.wpmt_current td.date,table#topics-list tr.wpmt_current td.freshness{border-right:2px solid #9f9f9f}{border-right:2px solid #9f9f9f}.wpmt_bozo_profile{display:block;margin-top:10px;color:white;text-align:center;background:red}.wpmt_profile_type{padding:4px 6px;border:1px solid red}.wpmt_profile_type.wpmt_green{border:1px solid green}.wpmt_selected,.wpmt_select{background-color: ' + select_color + ';}.wpmt_profile_type.wpmt_selected{padding: 5px 7px;border:none;}';
+		// admin_IPs style
+		style += '.mod-tools-ips-btn, .mod-tools-ips-wrapper{font-family: "Lucida Grande", Verdana, Arial, "Bitstream Vera Sans", sans-serif;} .mod-tools-ips-btn {border-radius:10px;padding:4px 9px 5px;background:url(images/white-grad.png) repeat-x #f2f2f2;border:1px solid #bbb;color:#464646;cursor:pointer;line-height:1.1em;font-size:.85em; margin: 1.2em 0 0 3em}.mod-tools-ips-wrapper{font-size: .85em; margin: 1em 0;} .mod-tools-ips-heading {font-weight: 700; margin-bottom: .8em} .mod-tools-results-list {padding-left: 5px; border-left: 2px solid gold;} .mod-tools-ips-button-pressed {border-color: gold;}';
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
 		// menu shortcuts
@@ -245,6 +247,7 @@ moderator_tools_with_jquery( function( $ ) {
 		// Show hidden links
 		var posts = $( '.post' );
 		showHiddenLinks( posts );
+		admin_IPs();
 	}
 
 
@@ -1816,6 +1819,55 @@ moderator_tools_with_jquery( function( $ ) {
 		}
 		
 		init();
+	}
+	
+	/*
+     * Get the IPs from the current BBadmin Posts page
+     */
+	 function admin_IPs() {
+		var button_target = $( 'div.submit' ),
+			results_target = $( '.table-form' ),
+			button = $( '<button class="button mod-tools-ips-btn">Extract IPs</button>' ),
+			button_wrapper = $( '<div />' ),
+			results_wrapper = $( '<div class="mod-tools-ips-wrapper" />' ),
+			results = $( '<ul class="mod-tools-results-list" />' );
+		
+		// Bind events to IPs button
+		button.click(function( event ) {
+			event.preventDefault();
+			
+			var IPs = $( '.post-ip-link' ),
+				results_heading = $('<h3 class="mod-tools-ips-heading">Extracted IPs</h3>'),
+				button = $(this);
+			
+			// Reset DOM
+			results.remove();
+			results = $( '<ul class="mod-tools-results-list" />' );
+			button.removeClass('mod-tools-ips-button-pressed');
+			
+			IPs.each(function(i, v) {
+				var IP_el = $( v ),
+					IP = IP_el.text();
+				
+				// Filter unique IPs
+				if ( results.find( '[data-mod-tools-ip=' + IP + ']' ).length === 0 ) {
+					results.append( '<li data-mod-tools-ip="' + IP +'">' + IP + '</li>' );
+				}
+			});          
+			
+			if ( results_wrapper.find('.mod-tools-ips-heading').length === 0 ) {
+				results_wrapper.append( results_heading );
+			}
+			results_wrapper.append( results );
+
+			// Class for styling
+			button.addClass('mod-tools-ips-button-pressed');
+		 });
+		
+		// Add markup  
+		results_target.before( results_wrapper );
+		button_wrapper.append( button );
+		button_target.after( button_wrapper );   
 	}
 
 	init();
