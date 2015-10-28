@@ -1550,8 +1550,7 @@ moderator_tools_with_jquery( function( $ ) {
 			pages = $( pagination ).find( 'a' ).not( '.next' ),
 			lastPage = pages.last(),
 			pageCount = 1,
-			location = window.location.href,
-			url = location.split( "?" )[ 0 ],
+			url =  window.location.href.split(/[?#]/)[0],
 			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
 			wrapper = $( '.all-reviews' ).append( container );
 
