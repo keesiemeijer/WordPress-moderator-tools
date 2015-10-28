@@ -48,6 +48,7 @@ moderator_tools_with_jquery( function( $ ) {
 		logged_in = false,
 		ajax = true,
 		review_filter = '',
+		profile_edit_href = '',
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
@@ -74,6 +75,7 @@ moderator_tools_with_jquery( function( $ ) {
 		w: "%w% - remove website url (or add it back)",
 		x: '%x% - select/deselect "Akismet Never Trust" checkbox',
 		z: '%z% - select/deselect "This user is a bozo" checkbox',
+		shift_b: '%shift b% - block user',
 		z_x: "%z% - go to the next normal profile post | %x% - go to the previous normal profile post",
 		z_x1: "%z% - go to the next user with a duplicate IP | %x% - go to the previous user with a duplicate IP",
 		shift_z_x: "%shift z% - go to the next bozo profile post | %shift x% - go to the previous bozo profile post",
@@ -253,13 +255,18 @@ moderator_tools_with_jquery( function( $ ) {
 	 */
 	function profile_edit_init() {
 
-		var website = $( '#user_url' );
+		var website = $( 'input#user_url' );
 
 		options = {
 			website: website,
 			site_url: website.val(),
 			bozo: $( 'input#is_bozo' ),
-			askimet: $( '#elf_not_trusted' )
+			askimet: $( 'input#elf_not_trusted' ),
+			trusted: $( 'input#elf_trusted' ),
+			location: $( 'input#from' ),
+			occupation: $( 'input#occ' ),
+			interest: $( 'input#interest' ),
+			user_type: $( 'select#admininfo_role' ),
 		};
 
 		// menu style
@@ -267,7 +274,7 @@ moderator_tools_with_jquery( function( $ ) {
 
 		// menu shortcuts
 		var shortcut_n_p = shortcuts.n_p.split( 'post' ).join( 'section' );
-		var shortcut_str = process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcut_n_p, shortcuts.e2, shortcuts.r, shortcuts.w, shortcuts.z, shortcuts.x ] );
+		var shortcut_str = process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcut_n_p, shortcuts.e2, shortcuts.r, shortcuts.w, shortcuts.z, shortcuts.x, shortcuts.shift_b ] );
 
 		shortcuts_top.append( shortcuts_title, menu_close );
 		shortcut_str = '<p>' + shortcut_str + '</p>';
@@ -350,9 +357,21 @@ moderator_tools_with_jquery( function( $ ) {
 		top_element = $( '#wporg-header' );
 		bottom_element = $( '#wporg-footer' );
 
-		// navigation
 		if ( logged_in ) {
+
+			// navigation
+			// sets profile_edit_href
 			profile_menu_navigagion();
+
+			if ( profile_edit_href.length ) {
+				$.get( profile_edit_href, function( data ) {
+					var user_type = $( data ).find( '#admininfo_role option:selected' );
+					var userinfo = $( 'dl#userinfo' );
+					if ( obj_exists( user_type ) && obj_exists( userinfo ) ) {
+						userinfo.append( $( '<dt>User Type</dt><dd><span class="wpmt">' + user_type.text() + '</span></dd>' ) );
+					}
+				} );
+			}
 		}
 	}
 
@@ -481,7 +500,37 @@ moderator_tools_with_jquery( function( $ ) {
 			var count = get_keydown_count( e );
 			var current;
 
-			if ( ( form_focus !== false ) || ( 1 !== count ) ) {
+			if ( form_focus !== false ) {
+				return;
+			}
+
+			// shift b - block user
+			if ( heldKeys.hasOwnProperty( 66 ) ) {
+
+				// shift
+				if ( heldKeys.hasOwnProperty( 16 ) && ( count === 2 ) ) {
+					var reply = confirm( "You're about to block this user!\nThis will remove user fields: Website, Location, Occupation and Interests.\n\n 'Cancel' to stop, 'OK' to block this user." );
+
+					if ( reply == true ) {
+						options.website.val( '' );
+						options.location.val( '' );
+						options.occupation.val( '' );
+						options.interest.val( '' );
+						options.user_type.val( "blocked" );
+						options.bozo.removeAttr( "checked" );
+						options.trusted.removeAttr( "checked" );
+
+						if ( !options.askimet.attr( "checked" ) ) {
+							options.askimet.click();
+						}
+
+						$('#profile-form').submit();
+					}
+				}
+			}
+
+			// All other shortcuts should only use one key
+			if ( 1 !== count ) {
 				return;
 			}
 
@@ -808,7 +857,6 @@ moderator_tools_with_jquery( function( $ ) {
 
 		var profile_menu = $( '#profile-menu' );
 		var profile_edit;
-		var profile_edit_href;
 		var bb_link_href;
 
 		// get edit link
@@ -1550,7 +1598,7 @@ moderator_tools_with_jquery( function( $ ) {
 			pages = $( pagination ).find( 'a' ).not( '.next' ),
 			lastPage = pages.last(),
 			pageCount = 1,
-			url =  window.location.href.split(/[?#]/)[0],
+			url = window.location.href.split( /[?#]/ )[ 0 ],
 			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
 			wrapper = $( '.all-reviews' ).append( container );
 
@@ -1678,7 +1726,7 @@ moderator_tools_with_jquery( function( $ ) {
 
 		button.click( function( event ) {
 			removeLinks();
-		});
+		} );
 	}
 
 	/**
@@ -1694,7 +1742,7 @@ moderator_tools_with_jquery( function( $ ) {
 			// find hidden links;
 			var hidden_links = post.find( 'a' ).filter( function( index ) {
 				var text = $.trim( $( this ).text() );
-				if( text == '' ){
+				if ( text == '' ) {
 					return true;
 				} else if ( text.length < 3 ) {
 					return true;
@@ -1735,85 +1783,85 @@ moderator_tools_with_jquery( function( $ ) {
 				post.append( link_container );
 			}
 		} );
-	}	 
-	
-	
+	}
+
+
 	/* Match IPs
 	 * Takes a string of IPs and checks whether those IPs exist on the page
 	 */
-	function match_IPs () {
-		var target = $('.review-ratings .col-1'),
-			match_summary_list = $('<ol />');
+	function match_IPs() {
+		var target = $( '.review-ratings .col-1' ),
+			match_summary_list = $( '<ol />' );
 
-		function create_form(target) {
-			var form = $('<form class="mod-tools-check-ips postform" />');
+		function create_form( target ) {
+			var form = $( '<form class="mod-tools-check-ips postform" />' );
 
-			form.append('<div class="form-row"><label for="mod-tools-check-ips">Match IPs</label></div>');
-			form.append('<div class="form-row"><input id="mod-tools-check-ips" placeholder="IPs space separated" type="text" /></div>');
-			form.append('<div class="form-row"><button class="button">Match</button></div>'); 
+			form.append( '<div class="form-row"><label for="mod-tools-check-ips">Match IPs</label></div>' );
+			form.append( '<div class="form-row"><input id="mod-tools-check-ips" placeholder="IPs space separated" type="text" /></div>' );
+			form.append( '<div class="form-row"><button class="button">Match</button></div>' );
 
-			target.append(form);
-		
+			target.append( form );
+
 			// Create custom behaviour on form submit
-			form.submit(function(event) {
+			form.submit( function( event ) {
 				event.preventDefault();
 
-				var form = $(this),
-					input = form.find('#mod-tools-check-ips').val(),
-					input_IPs = input.split(' '),
-					document_ips = $('.post-ip-link'),
-                    no_matches = true;					
-				
+				var form = $( this ),
+					input = form.find( '#mod-tools-check-ips' ).val(),
+					input_IPs = input.split( ' ' ),
+					document_ips = $( '.post-ip-link' ),
+					no_matches = true;
+
 				// Reset results
 				match_summary_list.remove();
-				match_summary_list = $('<ol />');
+				match_summary_list = $( '<ol />' );
 				// Reset styles
-				$('.mod-tools-ip-matched').removeClass('mod-tools-ip-matched');
+				$( '.mod-tools-ip-matched' ).removeClass( 'mod-tools-ip-matched' );
 
 				// For each IP in the DOM
-				document_ips.each(function(i, v) {
-					var document_IP = $(v);
+				document_ips.each( function( i, v ) {
+					var document_IP = $( v );
 
 					// Check the the IP matches any of those submitted in the form
-					if ($.inArray(document_IP.text(), input_IPs) !== -1) {
+					if ( $.inArray( document_IP.text(), input_IPs ) !== -1 ) {
 						var id = 'mod-tools-ip-match-' + i;
-						
+
 						// If matched
 						// - Compile an overview of all of the matched IPs
-						match_summary_list.append('<li><a href="#' + id + '">' + document_IP.text() + '</a></li>');
+						match_summary_list.append( '<li><a href="#' + id + '">' + document_IP.text() + '</a></li>' );
 						// - Add a class to style the IP
-						document_IP.addClass('mod-tools-ip-matched').attr('id', id);
-                        
-                        // Flag
-                        no_matches = false;
-					} 
-				});
+						document_IP.addClass( 'mod-tools-ip-matched' ).attr( 'id', id );
 
-                // No results
-                if (no_matches) {
-                    match_summary_list.append('<li>No matches</li>');
-                }
-                
-                // Add results to the DOM
-				form.after(match_summary_list);
-				
+						// Flag
+						no_matches = false;
+					}
+				} );
+
+				// No results
+				if ( no_matches ) {
+					match_summary_list.append( '<li>No matches</li>' );
+				}
+
+				// Add results to the DOM
+				form.after( match_summary_list );
+
 				return form;
-			});
+			} );
 		}
-		
+
 		function init() {
-			var form = create_form(target),
-				matched_summary_container = $('<div class="mod-tools-match-summary" />');
-			
-			matched_summary_container.append(form);
-			target.append(matched_summary_container);
-			
+			var form = create_form( target ),
+				matched_summary_container = $( '<div class="mod-tools-match-summary" />' );
+
+			matched_summary_container.append( form );
+			target.append( matched_summary_container );
+
 			// Grids
-			target.removeClass('col-1').addClass('col-3');
+			target.removeClass( 'col-1' ).addClass( 'col-3' );
 			// Styles
-			styles +=  '.form-row { display: block; overflow: hidden; margin-bottom: 5px;} .mod-tools-check-ips label { font-weight: 700; } .mod-tools-ip-matched { border: 2px solid gold; padding: 0 5px; } .mod-tools-ip-matched-text { background: gold; padding: 2px; }';
+			styles += '.form-row { display: block; overflow: hidden; margin-bottom: 5px;} .mod-tools-check-ips label { font-weight: 700; } .mod-tools-ip-matched { border: 2px solid gold; padding: 0 5px; } .mod-tools-ip-matched-text { background: gold; padding: 2px; }';
 		}
-		
+
 		init();
 	}
 
