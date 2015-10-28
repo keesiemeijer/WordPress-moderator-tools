@@ -464,6 +464,7 @@ moderator_tools_with_jquery( function( $ ) {
 		check_duplicate_IPs();
 		viewAllReviews();
 		duplicate_ip_navigation();
+		match_IPs();
 
 		top_bottom_navigation();
 		menu_navigation();
@@ -1678,7 +1679,7 @@ moderator_tools_with_jquery( function( $ ) {
 
 		button.click( function( event ) {
 			removeLinks();
-		} );
+		});
 	}
 
 	/**
@@ -1735,6 +1736,86 @@ moderator_tools_with_jquery( function( $ ) {
 				post.append( link_container );
 			}
 		} );
+	}	 
+	
+	
+	/* Match IPs
+	 * Takes a string of IPs and checks whether those IPs exist on the page
+	 */
+	function match_IPs () {
+		var target = $('.review-ratings .col-1'),
+			match_summary_list = $('<ol />');
+
+		function create_form(target) {
+			var form = $('<form class="mod-tools-check-ips postform" />');
+
+			form.append('<div class="form-row"><label for="mod-tools-check-ips">Match IPs</label></div>');
+			form.append('<div class="form-row"><input id="mod-tools-check-ips" placeholder="IPs space separated" type="text" /></div>');
+			form.append('<div class="form-row"><button class="button">Match</button></div>'); 
+
+			target.append(form);
+		
+			// Create custom behaviour on form submit
+			form.submit(function(event) {
+				event.preventDefault();
+
+				var form = $(this),
+					input = form.find('#mod-tools-check-ips').val(),
+					input_IPs = input.split(' '),
+					document_ips = $('.post-ip-link'),
+                    no_matches = true;					
+				
+				// Reset results
+				match_summary_list.remove();
+				match_summary_list = $('<ol />');
+				// Reset styles
+				$('.mod-tools-ip-matched').removeClass('mod-tools-ip-matched');
+
+				// For each IP in the DOM
+				document_ips.each(function(i, v) {
+					var document_IP = $(v);
+
+					// Check the the IP matches any of those submitted in the form
+					if ($.inArray(document_IP.text(), input_IPs) !== -1) {
+						var id = 'mod-tools-ip-match-' + i;
+						
+						// If matched
+						// - Compile an overview of all of the matched IPs
+						match_summary_list.append('<li><a href="#' + id + '">' + document_IP.text() + '</a></li>');
+						// - Add a class to style the IP
+						document_IP.addClass('mod-tools-ip-matched').attr('id', id);
+                        
+                        // Flag
+                        no_matches = false;
+					} 
+				});
+
+                // No results
+                if (no_matches) {
+                    match_summary_list.append('<li>No matches</li>');
+                }
+                
+                // Add results to the DOM
+				form.after(match_summary_list);
+				
+				return form;
+			});
+		}
+		
+		function init() {
+			var form = create_form(target),
+				matched_summary_container = $('<div class="mod-tools-match-summary" />');
+			
+			matched_summary_container.append(form);
+			target.append(matched_summary_container);
+			
+			// Grids
+			target.removeClass('col-1').addClass('col-3');
+			// Styles
+			styles +=  '.form-row { display: block; overflow: hidden; margin-bottom: 5px;} .mod-tools-check-ips label { font-weight: 700; } .mod-tools-ip-matched { border: 2px solid gold; padding: 0 5px; } .mod-tools-ip-matched-text { background: gold; padding: 2px; }';
+		}
+		
+		init();
 	}
 
 	init();
