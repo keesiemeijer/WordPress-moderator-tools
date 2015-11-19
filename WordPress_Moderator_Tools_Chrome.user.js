@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     5.0.0
+// @version     4.0.1
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -635,8 +635,9 @@ moderator_tools_with_jquery( function( $ ) {
 
 			options.post_content.val( user + content );
 			options.post_content[ 0 ].focus();
+			options.post_content.scrollTop(0);
 			options.post_content[ 0 ].setSelectionRange( caret, caret );
-
+            
 			scrollTo( options.post_content );
 		} );
 
