@@ -618,31 +618,24 @@ moderator_tools_with_jquery( function( $ ) {
 		$( '.wpmt_ping_link' ).bind( 'click.wpmt_ping', function( e ) {
 			e.preventDefault();
 
-			// get user href without trailing slash
-			// var user = $( this ).parents( '.threadauthor' ).find( 'a' ).first().attr('href').replace(/\/$/, '');
-
-			// get user profile name
-			// user = user.substr( user.lastIndexOf('/') + 1);
-
-			// Get user display name
+			// Get user_nicename
 			var user = $( this ).parents( '.threadauthor' ).find( 'strong' ).first().text();
 
 			if ( !obj_exists( options.post_content ) || !user.length ) {
 				return;
 			}
 
+			var post_content = options.post_content;
+
 			user = '@' + user + '\n';
-			var caret = user.length;
 
-			var content = options.post_content.val();
-			user += content.length ? '\n\n' : '';
+			var content = $.trim( post_content.val() );
+			user = content.length ? '\n\n' + user : user;
 
-			options.post_content.val( user + content );
-			options.post_content[ 0 ].focus();
-			options.post_content.scrollTop( 0 );
-			options.post_content[ 0 ].setSelectionRange( caret, caret );
+			post_content.val( content + user );
 
-			scrollTo( options.post_content );
+			post_content[ 0 ].focus();
+			post_content.scrollTop( post_content[ 0 ].scrollHeight );
 		} );
 
 
