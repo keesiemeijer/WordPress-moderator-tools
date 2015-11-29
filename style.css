@@ -48,3 +48,16 @@ code {
 	border: 1px solid #DEDEE3;
 	padding: 3px 5px;
 }
+
+.wpmt_shortcut {
+    background-color: #cae8f7;
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 4px;
+    padding: 1px 4px;
+}
+
+h4 {
+	 background-color: #cae8f7;
+	 padding: 1em;
+}
