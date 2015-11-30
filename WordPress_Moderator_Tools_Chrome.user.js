@@ -391,7 +391,7 @@ moderator_tools_with_jquery( function( $ ) {
 		};
 
 		// menu style
-		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}.wpmt_ping_link{margin-left:1em;}";
+		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
 		// menu shortcuts
@@ -433,7 +433,7 @@ moderator_tools_with_jquery( function( $ ) {
 		// add a ping link
 		if ( obj_exists( options.post_content ) ) {
 			$( '.threadauthor > p', next_prev_objects ).each( function( index ) {
-				$( this ).find( '.authortitle' ).after( '<a href="#post_content" class="wpmt_ping_link">@Ping</a>' );
+				$( this ).find( '.authortitle' ).after( ' - <a href="#post_content" class="wpmt_ping_link">@</a>' );
 			} );
 		}
 
