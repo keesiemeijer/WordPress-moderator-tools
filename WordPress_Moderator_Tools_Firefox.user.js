@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     4.0.1
+// @version     5.0.0
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -23,7 +23,7 @@
 	var select_color = '#e3cebd';
 
 	// Next up variables separated by comma's
-	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;display:block;} .reviewer .wpmt_ip-warning{display:inline-block;margin-right:1em;}.wpmt_screen_reader_text{clip: rect(1px, 1px, 1px, 1px);position: absolute !important;height: 1px;width: 1px;overflow: hidden;}',
+	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;display:block;} .reviewer .wpmt_ip-warning{display:inline-block;margin-right:1em;}.wpmt_screen_reader_text{clip: rect(1px, 1px, 1px, 1px);position: absolute !important;height: 1px;width: 1px;overflow: hidden;}.wpmt_error{color:red;}',
 		current_class = 'wpmt_current',
 		bb_admin_url = 'https://wordpress.org/support/bb-admin',
 		shortcuts_title = '<span class="wpmt_shortcuts_title">Shortcuts available for this page:</span>',
@@ -40,7 +40,6 @@
 		is_admin = false,
 		logged_in = false,
 		ajax = true,
-		review_filter = '',
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
 	var pattern = {
@@ -67,9 +66,10 @@
 		w: "%w% - remove website url (or add it back)",
 		x: '%x% - select/deselect "Akismet Never Trust" checkbox',
 		z: '%z% - select/deselect "This user is a bozo" checkbox',
+		shift_b: '%shift b% - block the current user',
 		z_x: "%z% - go to the next normal profile post | %x% - go to the previous normal profile post",
 		z_x1: "%z% - go to the next user with a duplicate IP | %x% - go to the previous user with a duplicate IP",
-		shift_z_x: "%shift z% - go to the next bozo profile post | %shift x% - go to the previous bozo profile post",
+		shift_z_x: "%shift z% - go to the next bozo or blocked profile post | %shift x% - go to the previous bozo or blocked profile post",
 		t_b: "%t% - go to the top of this page  | %b% - go to the bottom of this page",
 		n_p: "%n% - go to the next post | %p% - go to the previous post",
 		click_author: "%mouse click% - Click in the Author column to <span class='wpmt_select'>select</span>/deselect a post (also sets the post to current)",
@@ -134,7 +134,6 @@
 				if ( obj_exists( $( '.all-reviews' ) ) ) {
 					// wordpress.org/support/view/plugin-reviews/
 					// wordpress.org/support/view/theme-reviews/
-					review_filter = getParameterByName( 'filter' );
 					reviews_init();
 					navigation = false;
 				}
@@ -195,6 +194,8 @@
 
 		// menu style
 		var style = 'table.widefat tr.wpmt_current td{border:solid #9f9f9f;border-width:2px 0}table.widefat tr.wpmt_current td.check-column{border-left:2px solid #9f9f9f}table#posts-list tr.wpmt_current td.date,table#topics-list tr.wpmt_current td.freshness{border-right:2px solid #9f9f9f}{border-right:2px solid #9f9f9f}.wpmt_bozo_profile{display:block;margin-top:10px;color:white;text-align:center;background:red}.wpmt_profile_type{padding:4px 6px;border:1px solid red}.wpmt_profile_type.wpmt_green{border:1px solid green}.wpmt_selected,.wpmt_select{background-color: ' + select_color + ';}.wpmt_profile_type.wpmt_selected{padding: 5px 7px;border:none;}';
+		// admin_IPs style
+		style += '.mod-tools-ips-btn, .mod-tools-ips-wrapper{font-family: "Lucida Grande", Verdana, Arial, "Bitstream Vera Sans", sans-serif;} .mod-tools-ips-btn {border-radius:10px;padding:4px 9px 5px;background:url(images/white-grad.png) repeat-x #f2f2f2;border:1px solid #bbb;color:#464646;cursor:pointer;line-height:1.1em;font-size:.85em; margin: 1.2em 0 0 5em}.mod-tools-ips-wrapper{font-size: .85em; margin: 1em 0;} .mod-tools-ips-heading {font-weight: 700; margin-bottom: .8em} .mod-tools-results-list {padding-left: 5px; border-left: 2px solid gold;} .mod-tools-ips-button-pressed {border-color: gold;}';
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
 		// menu shortcuts
@@ -238,6 +239,10 @@
 		// Show hidden links
 		var posts = $( '.post' );
 		showHiddenLinks( posts );
+
+		if ( getParameterByName( 'post_author' ).length ) {
+			admin_IPs();
+		}
 	}
 
 
@@ -246,13 +251,18 @@
 	 */
 	function profile_edit_init() {
 
-		var website = $( '#user_url' );
+		var website = $( 'input#user_url' );
 
 		options = {
 			website: website,
 			site_url: website.val(),
 			bozo: $( 'input#is_bozo' ),
-			askimet: $( '#elf_not_trusted' )
+			askimet: $( 'input#elf_not_trusted' ),
+			trusted: $( 'input#elf_trusted' ),
+			location: $( 'input#from' ),
+			occupation: $( 'input#occ' ),
+			interest: $( 'input#interest' ),
+			user_type: $( 'select#admininfo_role' ),
 		};
 
 		// menu style
@@ -260,7 +270,7 @@
 
 		// menu shortcuts
 		var shortcut_n_p = shortcuts.n_p.split( 'post' ).join( 'section' );
-		var shortcut_str = process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcut_n_p, shortcuts.e2, shortcuts.r, shortcuts.w, shortcuts.z, shortcuts.x ] );
+		var shortcut_str = process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcut_n_p, shortcuts.e2, shortcuts.r, shortcuts.w, shortcuts.z, shortcuts.x, shortcuts.shift_b ] );
 
 		shortcuts_top.append( shortcuts_title, menu_close );
 		shortcut_str = '<p>' + shortcut_str + '</p>';
@@ -343,9 +353,21 @@
 		top_element = $( '#wporg-header' );
 		bottom_element = $( '#wporg-footer' );
 
-		// navigation
 		if ( logged_in ) {
+
+			// navigation
+			// sets options.edit_href
 			profile_menu_navigagion();
+
+			if ( options.edit_href.length ) {
+				$.get( options.edit_href, function( data ) {
+					var user_type = $( data ).find( '#admininfo_role option:selected' );
+					var userinfo = $( 'dl#userinfo' );
+					if ( obj_exists( user_type ) && obj_exists( userinfo ) ) {
+						userinfo.append( $( '<dt>User Type</dt><dd><span class="wpmt">' + user_type.text() + '</span></dd>' ) );
+					}
+				} );
+			}
 		}
 	}
 
@@ -356,11 +378,12 @@
 
 		options = {
 			tags: $( '#yourtaglist' ),
-			author: '.threadauthor > p > strong'
+			author: '.threadauthor > p > strong',
+			post_content: $( '#post_content' ),
 		};
 
 		// menu style
-		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
+		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}.wpmt_ping_link{margin-left:1em;}";
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
 		// menu shortcuts
@@ -399,6 +422,13 @@
 
 		add_modlook_profile();
 
+		// add a ping link
+		if ( obj_exists( options.post_content ) ) {
+			$( '.threadauthor > p', next_prev_objects ).each( function( index ) {
+				$( this ).find( '.authortitle' ).after( '<a href="#post_content" class="wpmt_ping_link">@Ping</a>' );
+			} );
+		}
+
 		// functions and event listners for this page	
 		topic_event_listeners();
 
@@ -412,7 +442,6 @@
 			var posts = $( '.threadpost .post' );
 			showHiddenLinks( posts );
 		}
-
 	}
 
 
@@ -424,7 +453,8 @@
 		}
 
 		options = {
-			author: '.reviewer-name'
+			author: '.reviewer-name',
+			target: $( '.review-ratings .col-1' )
 		};
 
 		// menu shortcuts
@@ -457,6 +487,7 @@
 		check_duplicate_IPs();
 		viewAllReviews();
 		duplicate_ip_navigation();
+		match_IPs();
 
 		top_bottom_navigation();
 		menu_navigation();
@@ -473,7 +504,37 @@
 			var count = get_keydown_count( e );
 			var current;
 
-			if ( ( form_focus !== false ) || ( 1 !== count ) ) {
+			if ( form_focus !== false ) {
+				return;
+			}
+
+			// shift b - block user
+			if ( heldKeys.hasOwnProperty( 66 ) ) {
+
+				// shift
+				if ( heldKeys.hasOwnProperty( 16 ) && ( count === 2 ) ) {
+					var reply = confirm( "You're about to block this user!\nThis will remove user fields: Website, Location, Occupation and Interests.\n\n 'Cancel' to stop, 'OK' to block this user." );
+
+					if ( reply == true ) {
+						options.website.val( '' );
+						options.location.val( '' );
+						options.occupation.val( '' );
+						options.interest.val( '' );
+						options.user_type.val( "blocked" );
+						options.bozo.removeAttr( "checked" );
+						options.trusted.removeAttr( "checked" );
+
+						if ( !options.askimet.attr( "checked" ) ) {
+							options.askimet.click();
+						}
+
+						$( '#profile-form' ).submit();
+					}
+				}
+			}
+
+			// All other shortcuts should only use one key
+			if ( 1 !== count ) {
 				return;
 			}
 
@@ -546,6 +607,30 @@
 		} );
 
 
+		$( '.wpmt_ping_link' ).bind( 'click.wpmt_ping', function( e ) {
+			e.preventDefault();
+
+			// Get user_nicename
+			var user = $( this ).parents( '.threadauthor' ).find( 'strong' ).first().text();
+
+			if ( !obj_exists( options.post_content ) || !user.length ) {
+				return;
+			}
+
+			var post_content = options.post_content;
+
+			user = '@' + user + '\n';
+
+			var content = $.trim( post_content.val() );
+			user = content.length ? '\n\n' + user : user;
+
+			post_content.val( content + user );
+
+			post_content[ 0 ].focus();
+			post_content.scrollTop( post_content[ 0 ].scrollHeight );
+		} );
+
+
 		$( 'html' ).bind( 'keydown.wpmt', function( e ) {
 
 			if ( form_focus !== false ) {
@@ -568,6 +653,7 @@
 
 			}
 		} );
+
 
 		// If ajax mode is enabled, remove tags via ajax instead of reloading the page repeatedly
 		$( '[class^="delete:yourtaglist:"]' ).click( function( e ) {
@@ -750,6 +836,7 @@
 					success: function( html ) {
 						$parent.fadeOut( 300, function() {
 							$( this ).remove();
+							reset_author();
 						} );
 					}
 				} );
@@ -800,8 +887,8 @@
 
 		var profile_menu = $( '#profile-menu' );
 		var profile_edit;
-		var profile_edit_href;
 		var bb_link_href;
+		var profile_edit_href;
 
 		// get edit link
 		if ( obj_exists( profile_menu ) ) {
@@ -829,6 +916,8 @@
 		if ( !( profile_edit_href.length || bb_link_href.length ) ) {
 			return;
 		}
+
+		options.edit_href = profile_edit_href;
 
 		// e and r keydown event
 		$( 'html' ).bind( 'keydown.wpmt', function( e ) {
@@ -1109,6 +1198,7 @@
 		options.stats.empty();
 		var bozo = 0;
 		options.author.each( function() {
+
 			var post_color = $( this ).parent().children( '.check-column' ).css( "background-color" ),
 				displayname = $.trim( $( this ).children().first( 'a' ).text() ),
 				checkbox = $( this ).parent().find( options.column );
@@ -1118,9 +1208,19 @@
 			if ( !obj_exists( $( this ).children( '.wpmt_profile_edit' ) ) ) {
 				var img = $( "img", $( this ).children().first( 'a' ) ),
 					edit_link_span = '<br/><span class="wpmt_profile_edit"><a href="' + $( this ).children().first( 'a' ).attr( "href" ) + '/edit">Edit Profile</a></span>';
-				if ( displayname.indexOf( '(BOZO)' ) >= 0 ) {
+
+				var bozostr = ( displayname.indexOf( '(BOZO)' ) !== -1 ) ? 'BOZO' : '';
+
+				if ( displayname.indexOf( '(BLOCKED)' ) !== -1 ) {
+					bozostr += ( bozostr.length ) ? ' - BLOCKED' : 'BLOCKED';
+				}
+
+				if ( bozostr.length ) {
+
 					// spam and deleted posts
 					displayname = $.trim( displayname.replace( '(BOZO)', '' ) );
+					displayname = $.trim( displayname.replace( '(BLOCKED)', '' ) );
+
 					$( this ).children().first( 'a' ).text( ' ' + displayname );
 					if ( img ) {
 						$( this ).children().first( 'a' ).prepend( img );
@@ -1135,26 +1235,34 @@
 							dataType: 'html',
 							success: function( html ) {
 								if ( -1 != html.search( pattern.ANT ) ) {
-									$container.append( '<span class="wpmt_bozo_profile" >BOZO (ANT)</span>' );
-									$container.parent().addClass( 'wpmt_bozo_post' );
+									$container.append( '<span class="wpmt_bozo_profile" >' + bozostr + ' - ANT</span>' );
+									$container.parents( 'tr' ).addClass( 'wpmt_bozo_post' );
 								} else {
-									$container.append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
-									$container.parent().addClass( 'wpmt_bozo_post' );
+									$container.append( '<span class="wpmt_bozo_profile" >' + bozostr + '</span>' );
+									$container.parents( 'tr' ).addClass( 'wpmt_bozo_post' );
 								}
+							},
+							error: function() {
+								$container.append( '<span class="wpmt_bozo_profile" >' + bozostr + '</span>' );
+								$container.parents( 'tr' ).addClass( 'wpmt_bozo_post' );
 							}
 						} );
 					} else {
-						$( this ).append( '<span class="wpmt_bozo_profile" >BOZO</span>' );
-						$( this ).parent().addClass( 'wpmt_bozo_post' );
+						$( this ).append( '<span class="wpmt_bozo_profile" >' + bozostr + '</span>' );
+						$( this ).parents( 'tr' ).addClass( 'wpmt_bozo_post' );
 					}
-					++bozo;
+
+					if ( bozostr.indexOf( 'BOZO' ) !== -1 ) {
+						++bozo;
+					}
 				} else {
 					$( this ).parent().addClass( 'wpmt_normal_post' );
 				}
 				// add edit profile link
 				$( this ).children().first( 'a' ).after( edit_link_span );
 			} else {
-				if ( obj_exists( $( this ).children( 'span.wpmt_bozo_profile' ) ) ) {
+				var bozo_span = $( this ).find( 'span.wpmt_bozo_profile' );
+				if ( obj_exists( bozo_span ) && ( bozo_span.text().indexOf( 'BOZO' ) !== -1 ) ) {
 					++bozo;
 				}
 			}
@@ -1196,9 +1304,9 @@
 			detected_string += ' &#10022; <span class="wpmt_profile_type">';
 			detected_string += ( bozo > 0 ) ? bozo + ' bozo' + ( ( bozo === 1 ) ? '' : 's' ) : '0 bozos';
 			detected_string += '</span>';
-			detected_string += ' &#10022; <span class="wpmt_profile_type wpmt_green">';
-			detected_string += ( total_selected - bozo > 0 ) ? ( total_selected - bozo ) + ' normal profile' + ( ( ( total_selected - bozo ) === 1 ) ? '' : 's' ) : 'no normal profiles';
-			detected_string += '</span>';
+			// detected_string += ' &#10022; <span class="wpmt_profile_type wpmt_green">';
+			// detected_string += ( total_selected - bozo > 0 ) ? ( total_selected - bozo ) + ' normal profile' + ( ( ( total_selected - bozo ) === 1 ) ? '' : 's' ) : 'no normal profiles';
+			// detected_string += '</span>';
 		}
 		detected_string += ' | <span class="wpmt_profile_type wpmt_selected">';
 		detected_string += ( selected > 0 ) ? selected + ' ' + type + ( ( selected === 1 ) ? '' : 's' ) + ' selected' : 'No ' + type + 's selected';
@@ -1274,31 +1382,39 @@
 	 * Adds a profile link to the modlook tag
 	 */
 	function add_modlook_profile() {
-		$( "#yourtaglist" ).find( 'a' ).each( function() {
-			if ( $( this ).text() === 'modlook' ) {
-				var parent = $( this ).parents( 'li' );
-				if ( obj_exists( parent ) ) {
-					parent_id = parent.attr( 'id' ).split( '_' );
-					if ( parent_id[ 1 ].length ) {
-						if ( ajax ) {
-							var label = parent_id[ 1 ];
-							$.ajax( {
-								url: 'https://wordpress.org/support/profile/' + parent_id[ 1 ],
-								async: true,
-								dataType: 'html',
-								success: function( html ) {
-									var details = pattern.username.exec( html );
-									if ( details.length >= 2 ) {
-										label = details[ 1 ];
-									}
 
-									parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + label + '</a>' ) );
-								}
-							} );
-						} else {
-							parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + parent_id[ 1 ] + '</a>' ) );
+		$( "#yourtaglist" ).find( 'a' ).each( function() {
+
+			if ( $( this ).text() !== 'modlook' ) {
+				return true;
+			}
+
+			var parent = $( this ).parents( 'li' );
+
+			if ( !obj_exists( parent ) ) {
+				return true;
+			}
+
+			parent_id = parent.attr( 'id' ).split( '_' );
+
+			if ( parent_id[ 1 ].length ) {
+				if ( ajax ) {
+					var label = parent_id[ 1 ];
+					$.ajax( {
+						url: 'https://wordpress.org/support/profile/' + parent_id[ 1 ],
+						async: true,
+						dataType: 'html',
+						success: function( html ) {
+							var details = pattern.username.exec( html );
+							if ( details.length >= 2 ) {
+								label = details[ 1 ];
+							}
+
+							parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + label + '</a>' ) );
 						}
-					}
+					} );
+				} else {
+					parent.append( $( '<a class="wpmt_modlook" href="https://wordpress.org/support/profile/' + parent_id[ 1 ] + '" title="modlook tagged by user ' + parent_id[ 1 ] + '">' + parent_id[ 1 ] + '</a>' ) );
 				}
 			}
 		} );
@@ -1516,6 +1632,29 @@
 	}
 
 
+	/**
+	 * Removes links from a text string
+	 */
+	function removeLinks( text ) {
+		var replaceContent = '<em>[Link redacted]</em>',
+
+			matches = {
+				'link': /<a.*?<\/a>/gi,
+				'http': /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi,
+				'www': /(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi
+			};
+
+		// Run the Regex to remove the links
+		return text
+			.replace( matches.link, replaceContent )
+			.replace( matches.http, replaceContent )
+			.replace( matches.www, replaceContent );
+	}
+
+
+	/**
+	 * Gets the value from a url query parameter
+	 */
 	function getParameterByName( name ) {
 		name = name.replace( /[\[]/, "\\[" ).replace( /[\]]/, "\\]" );
 		var regex = new RegExp( "[\\?&]" + name + "=([^&#]*)" ),
@@ -1542,8 +1681,8 @@
 			pages = $( pagination ).find( 'a' ).not( '.next' ),
 			lastPage = pages.last(),
 			pageCount = 1,
-			location = window.location.href,
-			url = location.split( "?" )[ 0 ],
+			url = window.location.href.split( /[?#]/ )[ 0 ],
+			review_filter = getParameterByName( 'filter' ),
 			container = $( '<div class="all-reviews_container" id="all-reviews_container"/>' ),
 			wrapper = $( '.all-reviews' ).append( container );
 
@@ -1638,46 +1777,33 @@
 	 * wordpress.org/support/edit.php
 	 */
 	function add_strip_links_button_to_editor() {
-		var button = $( '<input class="ed_button" type="button" value="strip links" />' );
+		var button = $( '<input class="ed_button" type="button" value="strip links" />' ),
+			toolbar = $( '#ed_toolbar' ),
+			post = $( '#post_content' );
 
-		function addBtn() {
-			var toolbar = $( '#ed_toolbar' );
-
-			toolbar.append( button );
+		if ( !obj_exists( toolbar ) || !obj_exists( content ) ) {
+			return;
 		}
 
-		function removeLinks() {
-			var post = $( '#post_content' ),
-				postContent = post.val(),
-				replaceContent = '<em>[Link redacted]</em>',
-				updatedContent,
-				matches = {
-					'link': /<a.*?<\/a>/gi,
-					'http': /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi,
-					'www': /(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi
-				};
-
-			// Run the Regex to remove the links
-			updatedContent = postContent
-				.replace( matches.link, replaceContent )
-				.replace( matches.http, replaceContent )
-				.replace( matches.www, replaceContent );
-
-			// Update the post content 
-			post.val( updatedContent );
-		}
-
-		addBtn();
+		toolbar.append( button );
 
 		button.click( function( event ) {
-			removeLinks();
+			// Update the post content 
+
+			updatedContent = removeLinks( post.val() );
+			post.val( updatedContent );
 		} );
 	}
+
 
 	/**
 	 * Makes visible links that would otherwise be hidden
 	 */
 	function showHiddenLinks( posts ) {
+
+		if ( !obj_exists( posts ) ) {
+			return;
+		}
 
 		var hidden_style = 'border: 2px solid gold; display: inline-block; margin: 5px; padding: 5px;';
 
@@ -1687,7 +1813,7 @@
 			// find hidden links;
 			var hidden_links = post.find( 'a' ).filter( function( index ) {
 				var text = $.trim( $( this ).text() );
-				if( text == '' ){
+				if ( text == '' ) {
 					return true;
 				} else if ( text.length < 3 ) {
 					return true;
@@ -1728,6 +1854,130 @@
 				post.append( link_container );
 			}
 		} );
+	}
+
+
+	/** 
+	 * Takes a string of IPs and checks whether those IPs exist on the page
+	 */
+	function match_IPs() {
+
+		var match_summary_list = $( '<ol />' ),
+			target = options.target,
+			form = $( '<form class="mod-tools-check-ips postform" />' ),
+			matched_summary_container = $( '<div class="mod-tools-match-summary" />' );
+
+		if ( !obj_exists( target ) ) {
+			return;
+		}
+
+		// Grids
+		target.removeClass( 'col-1' ).addClass( 'col-3' );
+		// Styles
+		styles += '.form-row { display: block; overflow: hidden; margin-bottom: 5px;} .mod-tools-check-ips label { font-weight: 700; } .mod-tools-ip-matched { border: 2px solid gold; padding: 0 5px; } .mod-tools-ip-matched-text { background: gold; padding: 2px; }';
+
+		form.append( '<div class="form-row"><label for="mod-tools-check-ips">Match IPs</label></div>' );
+		form.append( '<div class="form-row"><input id="mod-tools-check-ips" placeholder="IPs space separated" type="text" /></div>' );
+		form.append( '<div class="form-row"><button class="button">Match</button></div>' );
+
+		target.append( form );
+
+		matched_summary_container.append( form );
+		target.append( matched_summary_container );
+
+		// Create custom behaviour on form submit
+		form.submit( function( event ) {
+			event.preventDefault();
+
+			var input = $( this ).find( '#mod-tools-check-ips' ).val(),
+				input_IPs = input.split( ' ' ),
+				document_ips = $( '.post-ip-link' ),
+				no_matches = true;
+
+			// Reset results
+			match_summary_list.remove();
+			match_summary_list = $( '<ol />' );
+
+			// Reset styles
+			$( '.mod-tools-ip-matched' ).removeClass( 'mod-tools-ip-matched' );
+
+			// For each IP in the DOM
+			document_ips.each( function( i, v ) {
+				var document_IP = $( v );
+
+				// Check the the IP matches any of those submitted in the form
+				if ( $.inArray( document_IP.text(), input_IPs ) !== -1 ) {
+					var id = 'mod-tools-ip-match-' + i;
+
+					// If matched
+					// - Compile an overview of all of the matched IPs
+					match_summary_list.append( '<li><a href="#' + id + '">' + document_IP.text() + '</a></li>' );
+					// - Add a class to style the IP
+					document_IP.addClass( 'mod-tools-ip-matched' ).attr( 'id', id );
+
+					// Flag
+					no_matches = false;
+				}
+			} );
+
+			// No results
+			if ( no_matches ) {
+				match_summary_list.append( '<li>No matches</li>' );
+			}
+
+			// Add results to the DOM
+			$( this ).after( match_summary_list );
+		} );
+	}
+
+
+	/**
+	 * Get the IPs from the current BBadmin Posts page
+	 */
+	function admin_IPs() {
+		var button_target = $( 'div.submit' ),
+			results_target = $( '.table-form' ),
+			button = $( '<button class="button mod-tools-ips-btn">Extract IPs</button>' ),
+			button_wrapper = $( '<div />' ),
+			results_wrapper = $( '<div class="mod-tools-ips-wrapper" />' ),
+			results = $( '<ul class="mod-tools-results-list" />' );
+
+		// Bind events to IPs button
+		button.click( function( event ) {
+			event.preventDefault();
+
+			var IPs = $( '.post-ip-link' ),
+				results_heading = $( '<h3 class="mod-tools-ips-heading">Extracted IPs</h3>' ),
+				button = $( this );
+
+			// Reset DOM
+			results.remove();
+			results = $( '<ul class="mod-tools-results-list" />' );
+			button.removeClass( 'mod-tools-ips-button-pressed' );
+
+			IPs.each( function( i, v ) {
+				var IP_el = $( v ),
+					IP = IP_el.text();
+
+				// Filter unique IPs
+				if ( results.find( '[data-mod-tools-ip=' + IP + ']' ).length === 0 ) {
+					results.append( '<li data-mod-tools-ip="' + IP + '">' + IP + '</li>' );
+				}
+			} );
+
+			if ( results_wrapper.find( '.mod-tools-ips-heading' ).length === 0 ) {
+				results_wrapper.append( results_heading );
+			}
+			results_wrapper.append( results );
+
+			// Class for styling
+			button.addClass( 'mod-tools-ips-button-pressed' );
+		} );
+
+		// Add markup  
+		results_target.before( results_wrapper );
+		button_wrapper.append( button );
+		button_target.after( button_wrapper );
 	}
 
 	init();
