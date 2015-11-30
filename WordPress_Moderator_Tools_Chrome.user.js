@@ -1789,7 +1789,7 @@ moderator_tools_with_jquery( function( $ ) {
 			toolbar = $( '#ed_toolbar' ),
 			post = $( '#post_content' );
 
-		if ( !obj_exists( toolbar ) || !obj_exists( content ) ) {
+		if ( !obj_exists( toolbar ) || !obj_exists( post ) ) {
 			return;
 		}
 
