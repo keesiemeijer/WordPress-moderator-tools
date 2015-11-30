@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     5.0.0
+// @version     5.0.1
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -391,7 +391,7 @@ moderator_tools_with_jquery( function( $ ) {
 		};
 
 		// menu style
-		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}.wpmt_ping_link{margin-left:1em;}";
+		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
 		// menu shortcuts
@@ -433,7 +433,7 @@ moderator_tools_with_jquery( function( $ ) {
 		// add a ping link
 		if ( obj_exists( options.post_content ) ) {
 			$( '.threadauthor > p', next_prev_objects ).each( function( index ) {
-				$( this ).find( '.authortitle' ).after( '<a href="#post_content" class="wpmt_ping_link">@Ping</a>' );
+				$( this ).find( '.authortitle' ).after( ' - <a href="#post_content" class="wpmt_ping_link">@</a>' );
 			} );
 		}
 
@@ -1789,7 +1789,7 @@ moderator_tools_with_jquery( function( $ ) {
 			toolbar = $( '#ed_toolbar' ),
 			post = $( '#post_content' );
 
-		if ( !obj_exists( toolbar ) || !obj_exists( content ) ) {
+		if ( !obj_exists( toolbar ) || !obj_exists( post ) ) {
 			return;
 		}
 
