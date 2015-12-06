@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/plugin-reviews/*
 // @include     *://*wordpress.org/support/view/theme-reviews/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     5.0.1
+// @version     5.0.2
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -38,7 +38,7 @@
 		options = {},
 		form_focus = false,
 		is_admin = false,
-		logged_in = false,
+		is_mod = false,
 		ajax = true,
 		top_element, bottom_element, current_element, next_element, next_prev_objects;
 
@@ -91,15 +91,17 @@
 
 		if ( obj_exists( $( '#posts-list' ) ) ) {
 			// wordpress.org/support/bb-admin/posts.php
-			is_admin = true;
-			logged_in = true;
+
+			is_admin = true; // in admin backend
+			is_mod = true; // logged in moderator
+
 			bb_admin_posts_init( 'posts' );
 		}
 
 		if ( obj_exists( $( '#topics-list' ) ) ) {
 			// wordpress.org/support/bb-admin/topics.php
 			is_admin = true;
-			logged_in = true;
+			is_mod = true;
 			bb_admin_posts_init( 'topics' );
 		}
 
@@ -109,7 +111,7 @@
 
 			if ( obj_exists( mod_login ) ) {
 
-				logged_in = true;
+				is_mod = true;
 
 				$( "head" ).append( '<style type=\"text/css\">#headline .login{text-align:right;}</style>' );
 				mod_login.append( ' | <a href="' + bb_admin_url + '/posts.php?forum_id=0&post_status=2">Spam Queue</a> | <a href="https://wordpress.org/tags/modlook">Modlook</a>' );
@@ -322,7 +324,7 @@
 		// menu shortcuts
 		var shortcut_str = process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcuts.n ] );
 
-		if ( logged_in ) {
+		if ( is_mod ) {
 			shortcut_str += process_shortcuts( [ shortcuts.e3, shortcuts.r ] );
 		}
 		shortcuts_top.append( shortcuts_title, menu_close );
@@ -353,7 +355,7 @@
 		top_element = $( '#wporg-header' );
 		bottom_element = $( '#wporg-footer' );
 
-		if ( logged_in ) {
+		if ( is_mod ) {
 
 			// navigation
 			// sets options.edit_href
@@ -509,10 +511,17 @@
 			}
 
 			// shift b - block user
-			if ( heldKeys.hasOwnProperty( 66 ) ) {
+			if ( heldKeys.hasOwnProperty( 66 ) && ( count === 2 ) ) {
 
 				// shift
-				if ( heldKeys.hasOwnProperty( 16 ) && ( count === 2 ) ) {
+				if ( heldKeys.hasOwnProperty( 16 ) ) {
+
+					// confirm() function (below) stops javasript events until confirmation is made
+					// reset values as if the keyup event has fired for both keys. 
+					e.which = '';
+					heldKeys = {};
+					count = 0;
+
 					var reply = confirm( "You're about to block this user!\nThis will remove user fields: Website, Location, Occupation and Interests.\n\n 'Cancel' to stop, 'OK' to block this user." );
 
 					if ( reply == true ) {
@@ -531,6 +540,7 @@
 						$( '#profile-form' ).submit();
 					}
 				}
+
 			}
 
 			// All other shortcuts should only use one key
@@ -836,6 +846,9 @@
 					success: function( html ) {
 						$parent.fadeOut( 300, function() {
 							$( this ).remove();
+							// Somehow form_focus is set to true after this ajax call :/
+							form_focus = false;
+							// reset author for menu
 							reset_author();
 						} );
 					}
@@ -1531,7 +1544,9 @@
 	 * Returns the count of keys currently being held.
 	 */
 	function get_keydown_count( e ) {
-		heldKeys[ e.which ] = true;
+		if ( $( e.which ).length ) {
+			heldKeys[ e.which ] = true;
+		}
 		return Object.keys( heldKeys ).length;
 	}
 
@@ -1600,7 +1615,7 @@
 		// reset held keys
 		heldKeys = {};
 
-		// keeps parent page javascript in tact
+		// Time out keeps parent page javascript event listeners in tact
 		setTimeout( function() {
 			window.open( url, '_blank' );
 		}, 200 );
