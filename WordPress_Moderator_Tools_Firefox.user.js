@@ -8,10 +8,10 @@
 // @include     *://*wordpress.org/support/forum/*
 // @include     *://*wordpress.org/support/topic/*
 // @include     *://*wordpress.org/support/edit.php?id=*
-// @include     *://*wordpress.org/support/view/plugin-reviews/*
-// @include     *://*wordpress.org/support/view/theme-reviews/*
+// @include     *://*wordpress.org/support/view/*
 // @include     *://*wordpress.org/tags/modlook
-// @version     5.0.2
+// @include     *://*wordpress.org/support/
+// @version     5.0.3
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -94,7 +94,7 @@
 
 			is_admin = true; // in admin backend
 			is_mod = true; // logged in moderator
-
+			//console.log('bb_admin_posts_init - posts');
 			bb_admin_posts_init( 'posts' );
 		}
 
@@ -102,6 +102,7 @@
 			// wordpress.org/support/bb-admin/topics.php
 			is_admin = true;
 			is_mod = true;
+			//console.log('bb_admin_posts_init - topics');
 			bb_admin_posts_init( 'topics' );
 		}
 
@@ -117,36 +118,47 @@
 				mod_login.append( ' | <a href="' + bb_admin_url + '/posts.php?forum_id=0&post_status=2">Spam Queue</a> | <a href="https://wordpress.org/tags/modlook">Modlook</a>' );
 
 				if ( obj_exists( $( '#profile-form' ) ) ) {
+					//console.log('profile_edit_init');
 					// wordpress.org/support/profile/
 					profile_edit_init();
 				}
 
 				if ( obj_exists( $( '.edit-form' ) ) ) {
+					//console.log('add buttons to editor');
 					// wordpress.org/support/edit.php
 					add_lower_case_button_to_editor();
 					add_strip_links_button_to_editor();
 					navigation = false;
 				}
 
-				if ( obj_exists( $( '.forumlist' ) ) ) {
+				var forumlist = $( '.forumlist' );
+
+				if ( obj_exists( forumlist ) ) {
+
 					// wordpress.org/support/forum/
-					add_view_is_all_parameter( '.widefat' );
+					if ( !forumlist.hasClass( 'reviews' ) ) {
+						//console.log('add view is all');
+						add_view_is_all_parameter( '.widefat' );
+					}
 				}
 
 				if ( obj_exists( $( '.all-reviews' ) ) ) {
 					// wordpress.org/support/view/plugin-reviews/
 					// wordpress.org/support/view/theme-reviews/
+					//console.log('reviews_init');
 					reviews_init();
 					navigation = false;
 				}
 			}
 
 			if ( obj_exists( $( '#user-replies' ) ) || obj_exists( $( '#user-threads' ) ) ) {
+				//console.log('profile_posts_init');
 				// wordpress.org/support/profile
 				profile_posts_init();
 			}
 
 			if ( obj_exists( $( '#thread' ) ) ) {
+				//console.log('topic_init');
 				// wordpress.org/support/topic
 				topic_init();
 				navigation = false;
