@@ -12,8 +12,8 @@
 // @include     *://*.forums.wordpress.org/tags/modlook
 // @include     *://*.forums.wordpress.org/
 // @version     5.0.3
-// @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Rosseta_Chrome_min.user.js
-// @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Rosseta_Chrome_min.user.js
+// @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Rosetta_Chrome_min.user.js
+// @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Rosetta_Chrome_min.user.js
 // @grant       none
 // ==/UserScript==
 
