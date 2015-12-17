@@ -11,7 +11,7 @@
 // @include     *://*wordpress.org/support/view/*
 // @include     *://*wordpress.org/tags/modlook
 // @include     *://*wordpress.org/support/
-// @version     5.0.3
+// @version     5.0.4
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -121,6 +121,19 @@ moderator_tools_with_jquery( function( $ ) {
 			if ( obj_exists( mod_login ) ) {
 
 				is_mod = true;
+
+				var admin_url = mod_login.parents( '.login' ).find( 'small > a' ).first().attr( 'href' );
+
+				// get BBadmin url from login for rosetta forums
+				if ( admin_url.length ) {
+
+					// remove query parameters and hash
+					admin_url.split( /[?#]/ )[ 0 ];
+					// strip trailing slash
+					admin_url = admin_url.replace( /\/$/g, '' );
+
+					bb_admin_url = admin_url;
+				}
 
 				$( "head" ).append( '<style type=\"text/css\">#headline .login{text-align:right;}</style>' );
 				mod_login.append( ' | <a href="' + bb_admin_url + '/posts.php?forum_id=0&post_status=2">Spam Queue</a> | <a href="https://wordpress.org/tags/modlook">Modlook</a>' );
@@ -381,7 +394,7 @@ moderator_tools_with_jquery( function( $ ) {
 			// sets options.edit_href
 			profile_menu_navigagion();
 
-			if ( options.edit_href.length ) {
+			if ( obj_exists( options.edit_href ) ) {
 				$.get( options.edit_href, function( data ) {
 					var user_type = $( data ).find( '#admininfo_role option:selected' );
 					var userinfo = $( 'dl#userinfo' );
@@ -408,8 +421,16 @@ moderator_tools_with_jquery( function( $ ) {
 		var style = ".wpmt_current .authortitle a, .reviewer-name {background-color: #efeef5;padding: 3px 6px;margin: 3px 0;display: inline-block;}.wpmt_ip-warning{color:red;}";
 		$( "head" ).append( '<style type=\"text/css\">' + styles + style + '</style>' );
 
+		var topic_shortcuts = process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcuts.n_p ] );
+
+		if ( is_mod ) {
+			topic_shortcuts += process_shortcuts( [ shortcuts.z_x1 ] );
+		}
+
+		topic_shortcuts += process_shortcuts( [ shortcuts.e4, shortcuts.click_post ] );
+
 		// menu shortcuts
-		var shortcut_str = '<p>' + process_shortcuts( [ shortcuts.m, shortcuts.t_b, shortcuts.n_p, shortcuts.z_x1, shortcuts.e4, shortcuts.click_post ] ) + '</p>';
+		var shortcut_str = '<p>' + topic_shortcuts + '</p>';
 		shortcuts_top.append( shortcuts_title, menu_close );
 
 		// append menu elements to container
@@ -433,7 +454,7 @@ moderator_tools_with_jquery( function( $ ) {
 		top_element = $( '#wporg-header' );
 		bottom_element = next_prev_objects.last();
 
-		if ( obj_exists( next_prev_objects ) > 1 ) {
+		if ( is_mod && ( obj_exists( next_prev_objects ) > 1 ) ) {
 			// checks for duplicate IPs
 			check_duplicate_IPs();
 		}
@@ -926,7 +947,22 @@ moderator_tools_with_jquery( function( $ ) {
 		// get edit link
 		if ( obj_exists( profile_menu ) ) {
 			profile_edit = profile_menu.find( 'a' ).filter( function( index ) {
-				return $( this ).text() === "Edit";
+				var url = $( this ).attr( 'href' );
+				if ( url.length ) {
+
+					// remove query parameters and hash
+					url = url.split( /[?#]/ )[ 0 ];
+					// strip trailing slash
+					url = url.replace( /\/$/g, '' );
+					// get last part of href
+					url = url.substring( url.lastIndexOf( '/' ) + 1 );
+
+					if ( 'edit' === url.toLowerCase() ) {
+						return true;
+					}
+				}
+
+				return false;
 			} );
 		} else {
 			return;
@@ -946,7 +982,7 @@ moderator_tools_with_jquery( function( $ ) {
 			}
 		}
 
-		if ( !( profile_edit_href.length || bb_link_href.length ) ) {
+		if ( !( obj_exists( profile_edit_href ) || obj_exists( bb_link_href ) ) ) {
 			return;
 		}
 
