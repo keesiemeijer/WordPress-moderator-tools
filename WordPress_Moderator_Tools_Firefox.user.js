@@ -11,6 +11,14 @@
 // @include     *://*wordpress.org/support/view/*
 // @include     *://*wordpress.org/tags/modlook
 // @include     *://*wordpress.org/support/
+// @include     *://*.forums.wordpress.org/bb-admin/posts.php*
+// @include     *://*.forums.wordpress.org/bb-admin/topics.php*
+// @include     *://*.forums.wordpress.org/profile/*
+// @include     *://*.forums.wordpress.org/forum/*
+// @include     *://*.forums.wordpress.org/topic/*
+// @include     *://*.forums.wordpress.org/edit.php?id=*
+// @include     *://*.forums.wordpress.org/view/*
+// @include     *://*.forums.wordpress.org/
 // @version     5.0.4
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js

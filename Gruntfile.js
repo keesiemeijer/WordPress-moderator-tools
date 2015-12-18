@@ -18,11 +18,7 @@ module.exports = function( grunt ) {
 			'chrome': {
 				'src': ['WordPress_Moderator_Tools_Chrome.user.js'],
 				'dest': 'Chrome_uglified.js'
-			},
-			'chrome_rosetta': {
-				'src': ['WordPress_Moderator_Tools_Rosetta_Chrome.user.js'],
-				'dest': 'Rosetta_Chrome_uglified.js'
-			},
+			}
 		}
 
 	} );
