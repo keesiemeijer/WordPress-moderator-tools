@@ -19,7 +19,7 @@
 // @include     *://*.forums.wordpress.org/edit.php?id=*
 // @include     *://*.forums.wordpress.org/view/*
 // @include     *://*.forums.wordpress.org/
-// @version     5.0.4
+// @version     5.0.5
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -34,6 +34,7 @@
 	var styles = '#moderator_tools_menu{position:fixed;top:10px;left:65px;background:white;border:3px solid #333333; color:#333333; padding: 0 3em 0 10px;}#moderator_tools_menu a{text-decoration:none;border:none;}#moderator_tools_menu a:hover{color:#d54e21;}#wordpress-org #moderator_tools_menu{font-size:13px}#wordpress-org #moderator_tools_menu .wpmt_close_menu span{display:none; }.wpmt_stats{padding-bottom:1em;}.wpmt_stats span{display:inline-block;margin:5px 0;}.wpmt_shortcuts_help{margin-left:5px;} .wpmt_shortcut{background-color:#cae8f7;padding:1px 3px;display:inline-block;margin-bottom:4px;font-weight:bold}.wpmt_shortcuts_title{display:block;font-weight:bold;margin:1em 0}#wordpress-org .wpmt_shortcuts_title{display:inline}.wpmt_shortcuts_top{margin-bottom:1em}.wpmt_close_menu{position: absolute; right: 0; top: 5px;padding:0;margin:4px 1em 0 0; }.wpmt_close_menu a{font-size:1.8em;border:0;}.wpmt_is_admin .wpmt_close_menu a{font-size:1.5em;}.wpmt_menu_state{margin-right:40px}.wpmt_profile_edit{display:block;margin-top:5px}.wpmt_modlook{background-color:#efeef5;margin-left:.5em;padding:1px 2px;}.wpmt_ip-warning{color:red;display:block;} .reviewer .wpmt_ip-warning{display:inline-block;margin-right:1em;}.wpmt_screen_reader_text{clip: rect(1px, 1px, 1px, 1px);position: absolute !important;height: 1px;width: 1px;overflow: hidden;}.wpmt_error{color:red;}',
 		current_class = 'wpmt_current',
 		bb_admin_url = 'https://wordpress.org/support/bb-admin',
+		forum_domain = "https://" + window.location.hostname,
 		shortcuts_title = '<span class="wpmt_shortcuts_title">Shortcuts available for this page:</span>',
 
 		// re-usable elements
@@ -136,7 +137,7 @@
 				}
 
 				$( "head" ).append( '<style type=\"text/css\">#headline .login{text-align:right;}</style>' );
-				mod_login.append( ' | <a href="' + bb_admin_url + '/posts.php?forum_id=0&post_status=2">Spam Queue</a> | <a href="https://wordpress.org/tags/modlook">Modlook</a>' );
+				mod_login.append( ' | <a href="' + bb_admin_url + '/posts.php?forum_id=0&post_status=2">Spam Queue</a> | <a href="' + forum_domain + '/tags/modlook">Modlook</a>' );
 
 				if ( obj_exists( $( '#profile-form' ) ) ) {
 					//console.log('profile_edit_init');
