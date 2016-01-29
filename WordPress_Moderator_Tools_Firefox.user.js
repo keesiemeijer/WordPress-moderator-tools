@@ -19,7 +19,7 @@
 // @include     *://*.forums.wordpress.org/edit.php?id=*
 // @include     *://*.forums.wordpress.org/view/*
 // @include     *://*.forums.wordpress.org/
-// @version     5.0.5
+// @version     5.0.6
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -294,11 +294,15 @@
 			site_url: website.val(),
 			bozo: $( 'input#is_bozo' ),
 			askimet: $( 'input#elf_not_trusted' ),
+			custom_title: $( 'input#minibb_title' ),
 			trusted: $( 'input#elf_trusted' ),
 			location: $( 'input#from' ),
 			occupation: $( 'input#occ' ),
 			interest: $( 'input#interest' ),
 			user_type: $( 'select#admininfo_role' ),
+			notify: $( 'input#notify_list' ),
+			dev_list: $( 'input#dev_list' ),
+			throttle: $( 'input[name="throttle"]' ),
 		};
 
 		// menu style
@@ -571,13 +575,14 @@
 						options.location.val( '' );
 						options.occupation.val( '' );
 						options.interest.val( '' );
+						options.custom_title.val( '' );
 						options.user_type.val( "blocked" );
 						options.bozo.removeAttr( "checked" );
 						options.trusted.removeAttr( "checked" );
-
-						if ( !options.askimet.attr( "checked" ) ) {
-							options.askimet.click();
-						}
+						options.askimet.removeAttr( "checked" );
+						options.throttle.removeAttr( "checked" );
+						options.dev_list.removeAttr( "checked" );
+						options.notify.removeAttr( "checked" );
 
 						$( '#profile-form' ).submit();
 					}
