@@ -19,7 +19,7 @@
 // @include     *://*.forums.wordpress.org/edit.php?id=*
 // @include     *://*.forums.wordpress.org/view/*
 // @include     *://*.forums.wordpress.org/
-// @version     5.0.6
+// @version     5.0.7
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Chrome_min.user.js
 // @grant       none
@@ -1880,7 +1880,6 @@ moderator_tools_with_jquery( function( $ ) {
 		} );
 	}
 
-
 	/**
 	 * Makes visible links that would otherwise be hidden
 	 */
@@ -1891,41 +1890,45 @@ moderator_tools_with_jquery( function( $ ) {
 		}
 
 		var hidden_style = 'border: 2px solid gold; display: inline-block; margin: 5px; padding: 5px;';
+		var admin_style = is_admin ? 'font-size:1.4em;' : '';
 
 		posts.each( function() {
 			var post = $( this );
+			var hidden_links = $();
+			var duplicates = {};
+			var link_container = $( '<div><span class="wpmt_screen_reader_text">Hidden links, or links with less than 3 characters found in post content</span></div>' );
 
 			// find hidden links;
-			var hidden_links = post.find( 'a' ).filter( function( index ) {
-				var text = $.trim( $( this ).text() );
-				if ( text == '' ) {
-					return true;
+			post.find( 'a' ).not( '.row-actions > a' ).each( function( index ) {
+				var text = $( this ).html().replace( /[\t\r\n]+/g, "" ).trim();
+				var hidden = false;
+
+				if ( text === '' ) {
+					hidden = true;
 				} else if ( text.length < 3 ) {
-					return true;
+					hidden = true;
+				} else if ( $( this ).outerWidth() == 0 ) {
+					hidden = true;
 				}
-				return false;
+
+				if ( hidden ) {
+
+					var link = $( this ).clone();
+					link.html( link.html().replace( /[\t\r\n]+/g, "" ).trim() );
+					var html = link.get( 0 ).outerHTML;
+					if ( !duplicates[ html ] ) {
+						duplicates[ html ] = true;
+						var pre = $( '<pre style="' + hidden_style + admin_style + '"></pre>' );
+						hidden_links = hidden_links.add( pre.text( html ) );
+					}
+				}
 			} );
 
-			if ( !obj_exists( hidden_links ) ) {
+			if ( !hidden_links.length ) {
 				return true;
 			}
 
-			var link_container = $( '<div><span class="wpmt_screen_reader_text">Hidden links, or links with less than 3 characters found in post content</span></div>' );
-
-			hidden_links.each( function() {
-
-				var link = $( this );
-				var admin_style = is_admin ? 'font-size:1.4em;' : '';
-
-				// Get the HTML of the link
-				link.text( link[ 0 ].outerHTML );
-				var pre = $( '<pre style="' + hidden_style + admin_style + '">' + link.html() + '</pre>' );
-				link_container.append( pre );
-
-				// Hide the original link
-				link.hide();
-
-			} );
+			link_container.append( hidden_links );
 
 			// Output it on the page
 			if ( is_admin ) {
