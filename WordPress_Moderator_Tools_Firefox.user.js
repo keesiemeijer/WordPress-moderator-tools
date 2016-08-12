@@ -19,7 +19,7 @@
 // @include     *://*.forums.wordpress.org/edit.php?id=*
 // @include     *://*.forums.wordpress.org/view/*
 // @include     *://*.forums.wordpress.org/
-// @version     5.0.7
+// @version     5.0.8
 // @downloadURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @updateURL https://github.com/keesiemeijer/WordPress-moderator-tools/raw/master/WordPress_Moderator_Tools_Firefox_min.user.js
 // @grant       none
@@ -667,12 +667,19 @@
 		$( '.wpmt_ping_link' ).bind( 'click.wpmt_ping', function( e ) {
 			e.preventDefault();
 
-			// Get user_nicename
-			var user = $( this ).parents( '.threadauthor' ).find( 'strong' ).first().text();
+			// Get username
+			var user = $( this ).siblings( '.authortitle' ).find( 'a' ).first().attr( 'href' );
 
 			if ( !obj_exists( options.post_content ) || !user.length ) {
 				return;
 			}
+
+			// remove query and hash
+			user = user.split( /[?#]/ )[ 0 ];
+			// strip trailing slash
+			user = user.replace( /\/$/g, '' );
+			// get last part of href
+			user = user.substring( user.lastIndexOf( '/' ) + 1 );
 
 			var post_content = options.post_content;
 
