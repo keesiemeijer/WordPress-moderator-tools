@@ -2,10 +2,9 @@ WordPress-moderator-tools
 =========================
 Tools for WordPress dot org forum moderators
 
-**Warning!** The user scripts found here are development versions and may be unstable.
+## [deprecated 1 September 2016]
+The user scripts here are deprecated because the WordPress forums are now using bbPress 2. These scripts were build for bbPress 1 and therefore uncompatible with the new forums.
 
-For more information and the latest stable versions please see http://keesiemeijer.github.io/WordPress-moderator-tools/
-
-Create pull requests from the [Chrome user script](https://github.com/keesiemeijer/WordPress-moderator-tools/blob/master/WordPress_Moderator_Tools_Chrome.user.js)
+For other WordPress tools see: http://keesiemeijer.github.io/WordPress-moderator-tools/
 
 
